@@ -13,10 +13,15 @@ int main(int argc, char* argv[])
     if(argc == 2)
     {
         error = settingsImport(argv[1], &width, &height, &matching);
+        if(error == FALSE)
+        {
+            userInterface(&width, &height, &matching);
+        }
     }
     else
     {
-        printf("ERROR: Invalid amount of arguments, exiting.. ");
+        printf("ERROR: Invalid amount of arguments, exiting..\n");
+        error = TRUE;
     }
     return error;
 }
