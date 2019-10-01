@@ -1,7 +1,5 @@
-
-
 #include "tictactoe.h"
-
+#include "userInterface.h"
 int main(int argc, char* argv[])
 {
     int width, height, matching;
@@ -15,7 +13,7 @@ int main(int argc, char* argv[])
         error = settingsImport(argv[1], &width, &height, &matching);
         if(error == FALSE)
         {
-            userInterface(&width, &height, &matching);
+            userInterface(width, height, matching);
         }
     }
     else
@@ -47,10 +45,11 @@ int settingsImport(char* fileName, int* width, int* height, int* matching)
     /* Checks if file opened, otherwise will print an error and exit */
     if(f != NULL)
     {
-        while(!feof(f))
+        while(!feof(f) && error == FALSE)
         {
-            nRead = fscanf(f,"%s=%d", setting, &value);
-            
+            nRead = fscanf(f,"%s=%d\n", setting, &value);
+            printf("%d", nRead);
+
             /* Checks if line was valid */
             if(nRead == 2)
             {
@@ -72,7 +71,7 @@ int settingsImport(char* fileName, int* width, int* height, int* matching)
                     if((value >= 1) && (heightBool == FALSE))/* Minimum of 1 row */
                     {
                         *height = value;
-                        widthBool = TRUE;
+                        widthBool = TRUE; /* sets bool to true, so duplicates dont occur */
                     }
                     else
                     {
@@ -90,13 +89,13 @@ int settingsImport(char* fileName, int* width, int* height, int* matching)
                 }
                 else
                 {
-                    printf("Invalid setting");
+                    printf("Invalid setting\n");
                     error = TRUE;
                 }
             }
             else
             {
-                printf("Invalid line");
+                printf("Invalid line\n");
                 error = TRUE;
             }
         }
