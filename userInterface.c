@@ -3,6 +3,8 @@ void userInterface(int width, int height, int matching)
 {
     int userInput;
     char line[255];
+    LinkedList* logs;
+    logs = createLinkedList();
     printf("Welcome to Tic Tac Toe\n");
     do
     {
@@ -33,7 +35,7 @@ void userInterface(int width, int height, int matching)
         switch(userInput)
         {
             case 1:
-                game(width, height, matching);
+                game(width, height, matching, logs);
                 break;
             case 2:
                 viewSettings(width, height, matching);

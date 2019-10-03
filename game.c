@@ -1,18 +1,18 @@
 #include "game.h"
 #include <time.h>
 /* CAlls the other methods to run a game */
-void game(int width, int height, int matching)
+void game(int width, int height, int matching, LinkedList* logs)
 {
     Tile** board;
     board = setup(width, height, matching);
-    userInput(board, width, height);
+    userInput(board, width, height, logs);
 }
 
 /* Creates the board and initializes the tiles 
     The board is constructed of a 2d array*/
 Tile** setup(int width, int height, int matching)
 {
-    int i, j; 
+    int x,y; 
     Tile** board;
     Tile defaultTile;
 
@@ -22,20 +22,30 @@ Tile** setup(int width, int height, int matching)
 
     /* Create the outer 2d array that holds the rows */ 
     board = (Tile**)malloc((height) * sizeof(Tile*));
-    for(i = 0; i < height; i++)
+    for(y = 0; y < height; y++)
     {
         /* Create the inner arrays (rows) */
-        board[i] = (Tile*)malloc((width) * sizeof(Tile));
+        board[y] = (Tile*)malloc((width) * sizeof(Tile));
     }
-
+    /* 
+            Board will look like this 
+            Where X = Column and Y = Row 
+                
+              X  0    1    2    3
+            Y  ____________________
+            0 | 0,0| 1,0| 2,0| 3,0|
+            1 | 1,0| 1,1| 1,2| 1,3|
+            2 | 2,0| 2,1| 2,2| 2,3|
+            3 | 3,0| 3,1| 3,2| 3,3|
+    */
     /* Initialize the tiles with default tile structs */
-    for(i = 0; i < height; i++)
+    for(y = 0; y < height; y++)
     {
-        for(j = 0; j < width; j++)
+        for(x = 0; x < width; x++)
         {
-            board[i][j] = defaultTile;
-            board[i][j].row = i;
-            board[i][j].col = j;
+            board[x][y] = defaultTile;
+            board[x][y].col = x;
+            board[x][y].row = y;
         }
     } 
     return board;  
@@ -46,6 +56,12 @@ void display(Tile** board, int width, int height)
 {
     int i, j, k;
 
+    /* Prints numbers above board */
+    for(i = 0; i <= width; i++)
+    {
+        printf("   %d", i);
+    }
+    printf("\n ");
     /* Prints first border of board */
     for(i = 0; i < width; i++)
     {
@@ -54,20 +70,20 @@ void display(Tile** board, int width, int height)
     /* Prints out the rows of the board */
     for(i = 0; i < height; i++)
     {
-        printf("\n|");
+        printf("\n%d|", i);
         for(j = 0; j < width; j++)
         {
-            /*printf("| %d,%d |", board[i][j].row, board[i][j].col);*/
-            printf(" %s |", board[i][j].value);
+            /*printf(" %d,%d ", board[i][j].row, board[i][j].col);*/
+            printf(" %s |", board[i][j].value); 
         }
-        printf("\n");
+        printf("\n ");
         /* Prints out the line seperators */
         for(k = 0; k < width; k++)
         {
             printf("-----");
         }
     }   
-    printf("\n");
+    printf("\n ");
     /* Prints out the base border of the game */
     for(i = 0; i < width; i++)
     {
@@ -75,37 +91,36 @@ void display(Tile** board, int width, int height)
     }
 }
 
-void userInput(Tile** board, int width, int height)
+void userInput(Tile** board, int width, int height, LinkedList* logs)
 {
-    int player;
-    int count;
-    int maxMoves;
+    int moveCount; /* Current number of moves */
+    int maxMoves; /* Maximum of moves until game is finished */
+    char* playerOne;
+    char* playerTwo;
+    char* playerOneTile;    /* String containing the players tile */
+    char* playerTwoTile;
 
-    /* Possible moves */
+    /* Possibly store these as constants??? */
+    playerOne = "Player One";
+    playerTwo = "Player Two";
+    playerOneTile = "X";
+    playerTwoTile = "O";
+
+    /* Possible moves, allows calculation of when the game should end*/
+    /* PROBLEM: Game just ends and doesn't print out who wins */
     maxMoves = width * height;
-    /* srand(time(0));
-    player = rand() % 2; */
-    /* REMOOOOOOOOOOOOVE THIS HARDCODE */
-    player = 1;
-    count = 0;
-    if(player == 1)
+    moveCount = 0;
+    while(moveCount < maxMoves)
     {
-        while(count < maxMoves)
-        {
-            playerOne(board, width, height);
-            count++;
-            playerTwo(board, width, height);
-            count++;
-        }
-    } 
-    else if(player == 2)
-    {
-        playerTwo(board, width, height);
-        playerOne(board, width, height);
+        playerMove(board, width, height, playerOne, playerOneTile);
+        moveCount++;
+        playerMove(board, width, height, playerTwo, playerTwoTile);
+        moveCount++;
     }
+    
 }
 
-void playerOne(Tile** board, int width, int height)
+void playerMove(Tile** board, int width, int height, char* player, char* playerTile)
 {
     int row;
     int col;
@@ -115,7 +130,7 @@ void playerOne(Tile** board, int width, int height)
     while(inputted == FALSE)
     {
         display(board, width, height);
-        printf("\nPlayer One, Please enter coords to place an X\n");
+        printf("\n%s, Please enter coords to place a %s\n", player, playerTile);
         nRead = scanf("%d,%d", &row, &col);
         if(nRead == 2)
         {
@@ -123,51 +138,10 @@ void playerOne(Tile** board, int width, int height)
             if((row < height && row >= 0) && (col < width && col >= 0))
             {
                 /* Checks if the tile is occupied */
-                if(strcmp(board[row][col].value, EMPTY_TILE) == 0)
+                if(strcmp(board[col][row].value, EMPTY_TILE) == 0)
                 {
-                    board[row][col].value = "X";
-                    inputted = TRUE;
-                }
-                else
-                {
-                    printf("ERROR: Tile is already occupied, please try again\n");
-                }
-            }
-            else
-            {
-                printf("ERROR: Coords not in range of board, please try again\n");
-            }  
-        }
-        else
-        {
-            printf("ERROR: Invalid coords inputted, please try again\n");
-        }
-    }
-}
-
-void playerTwo(Tile** board, int width, int height)
-{
-    int row;
-    int col;
-    int nRead;
-    int inputted;
-    inputted = FALSE;
-    while(inputted == FALSE)
-    {
-        display(board, width, height);
-        printf("\nPlayer Two, Please enter coords to place an O\n");
-        nRead = scanf("%d,%d", &row, &col);
-        if(nRead == 2)
-        {
-            /* Validates if the input value is within the board */
-            if((row < height && row >= 0) && (col < width && col >= 0))
-            {
-                /* Checks if the tile is occupied */
-                if(strcmp(board[row][col].value, EMPTY_TILE) == 0)
-                {
-                    board[row][col].value = "O";
-                    /* Sets inputted to true, to end the loop */
-                    inputted = TRUE;
+                    board[col][row].value = playerTile;
+                    inputted = TRUE; /* Ends the loop asking for input */
                 }
                 else
                 {
