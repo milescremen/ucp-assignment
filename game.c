@@ -293,5 +293,60 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
     }
     
 
+    /* Check Diagonal */
+    count = 1; 
+    colIndex = 0;
+    done = FALSE; 
+    
+    /* Iterates \
+                 \
+                  \ Up */
+
+    rowIndex = row - 1; /* Starts the column index to the left of the inputted tile */
+    colIndex = col - 1;
+    /* Then while their is matching tiles, it will iterate up
+        incrementing the count */
+    while(done == FALSE && rowIndex > -1 && colIndex > -1) /* Checks if the tile is matching to the players tile */
+    {
+        if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
+        {
+            rowIndex--; /* Moves Up 1 diagonally */
+            colIndex--;
+            count++;
+        }
+        else
+        {
+            done = TRUE;
+        }
+    }
+    
+    /* Iterates \
+                 \
+                  \ Down */
+    done = FALSE;
+    rowIndex = row + 1; /* Starts the column index to the right of the inputted tile */
+    colIndex = col + 1;
+    while(done == FALSE && rowIndex < height && colIndex < width) /* have to do this so no segmantation faults */
+    {
+        printf("Player Tile: %s\n", playerTile);
+        printf("Value: %s\n", board[colIndex][row].value); 
+        printf("%d, %d\n", col, row);
+        if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
+        {
+            rowIndex++;
+            colIndex++;
+            count++;
+        }
+        else
+        {
+            done = TRUE;
+        }   
+    }
+
+    printf("COUNT: %d\n", count); 
+    if(count >= matching)
+    {
+        printf("Win by Diagonal");
+    }
 }
 
