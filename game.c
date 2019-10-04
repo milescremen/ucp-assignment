@@ -82,7 +82,7 @@ void display(Tile** board, int width, int height)
         for(j = 0; j < width; j++)
         {
             /*printf(" %d,%d ", board[i][j].row, board[i][j].col);*/
-            printf(" %s |", board[i][j].value); 
+            printf(" %s |", board[j][i].value); 
         }
         printf("\n ");
         /* Prints out the line seperators */
@@ -149,7 +149,7 @@ MoveLog* playerMove(Tile** board, int width, int height, int matching, char* pla
     {
         display(board, width, height);
         printf("\n%s, Please enter coords to place a %s\n", player, playerTile);
-        nRead = scanf("%d,%d", &row, &col); /* this is the wrong way */
+        nRead = scanf("%d,%d", &col, &row);
         if(nRead == 2)
         {
             /* Validates if the input value is within the board */
@@ -192,9 +192,11 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
 {
     int count; /* Keeps count of the amount of adjacent playerTiles */
     int colIndex;
+    int rowIndex;
     int done;
     count = 1; 
     colIndex = 0;
+    rowIndex = 0;
     done = FALSE; 
     
     /* Check Horizontal */
@@ -220,7 +222,7 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
     /* Iterates to the right */
     done = FALSE;
     colIndex = col + 1; /* Starts the column index to the right of the inputted tile */
-    while(done == FALSE && colIndex <= width) /* have to do this so no segmantation faults */
+    while(done == FALSE && colIndex < width) /* have to do this so no segmantation faults */
     {
         printf("224");
         printf("Player Tile: %s\n", playerTile);
@@ -242,6 +244,54 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
     {
         printf("Win by horizontal");
     }
+
+    /* Check vertical */
+    count = 1; 
+    colIndex = 0;
+    done = FALSE; 
+    
+    /* Iterates upwards */
+    rowIndex = row - 1; /* Starts the column index to the left of the inputted tile */
+    /* Then while their is matching tiles, it will iterate to the left
+        incrementing the count */
+    while(done == FALSE && rowIndex > -1) /* Checks if the tile is matching to the players tile */
+    {
+        if(strcmp(board[col][rowIndex].value, playerTile) == 0)
+        {
+            rowIndex--; /* Moves index to the left */
+            count++;
+        }
+        else
+        {
+            done = TRUE;
+        }
+    }
+
+    /* Iterates to the right */
+    done = FALSE;
+    rowIndex = row + 1; /* Starts the column index to the right of the inputted tile */
+    while(done == FALSE && rowIndex < height) /* have to do this so no segmantation faults */
+    {
+        printf("Player Tile: %s\n", playerTile);
+        printf("Value: %s\n", board[colIndex][row].value); 
+        printf("%d, %d\n", col, row);
+        if(strcmp(board[col][rowIndex].value, playerTile) == 0)
+        {
+            rowIndex++;
+            count++;
+        }
+        else
+        {
+            done = TRUE;
+        }   
+    }
+
+    printf("COUNT: %d\n", count); 
+    if(count >= matching)
+    {
+        printf("Win by vertical");
+    }
+    
 
 }
 
