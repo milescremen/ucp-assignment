@@ -22,11 +22,23 @@ typedef struct {
    int col;
 } Tile;
 
+typedef struct {
+   int gameNum;
+   LinkedList* moves;
+} GameLog;
+
+typedef struct {
+   int turn;
+   char* player;
+   int xLocation;
+   int yLocation;
+} MoveLog;
+
 /* Forward Declarations */
 void game(int width, int height, int matching, LinkedList* logs);
 Tile** setup(int width, int height, int matching);
 void display(Tile** board, int width, int height);
-void userInput(Tile** board, int width, int height, LinkedList* logs);
-void playerMove(Tile** board, int width, int height, char* player, char* playerTile);
-
+void userInput(Tile** board, int width, int height, int matching, LinkedList* logs);
+MoveLog* playerMove(Tile** board, int width, int height, int matching, char* player, char* playerTile, int moveCount);
+void checkWin(Tile** board, int width, int height, int matching, int row, int col, char* playerTile);
 #endif

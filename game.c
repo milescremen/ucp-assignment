@@ -5,8 +5,16 @@ void game(int width, int height, int matching, LinkedList* logs)
 {
     Tile** board;
     board = setup(width, height, matching);
-    userInput(board, width, height, logs);
+    userInput(board, width, height, matching, logs);
 }
+/*
+void logsPrinter(void* ptr)
+{   
+    GameLog move;
+    move = (GameLog)ptr;
+    printf("%s, %d, %d, %d", move.player, move.xLocation, move.yLocation, move.turn);
+}
+*/
 
 /* Creates the board and initializes the tiles 
     The board is constructed of a 2d array*/
@@ -91,14 +99,19 @@ void display(Tile** board, int width, int height)
     }
 }
 
-void userInput(Tile** board, int width, int height, LinkedList* logs)
+void userInput(Tile** board, int width, int height, int matching, LinkedList* logs)
 {
+    GameLog gameLog;
+    MoveLog* move; 
     int moveCount; /* Current number of moves */
     int maxMoves; /* Maximum of moves until game is finished */
     char* playerOne;
     char* playerTwo;
     char* playerOneTile;    /* String containing the players tile */
     char* playerTwoTile;
+
+    /* Creating the linked list for the games log */
+    gameLog.moves = createLinkedList();    
 
     /* Possibly store these as constants??? */
     playerOne = "Player One";
@@ -112,26 +125,31 @@ void userInput(Tile** board, int width, int height, LinkedList* logs)
     moveCount = 0;
     while(moveCount < maxMoves)
     {
-        playerMove(board, width, height, playerOne, playerOneTile);
         moveCount++;
-        playerMove(board, width, height, playerTwo, playerTwoTile);
+        move = playerMove(board, width, height, matching, playerOne, playerOneTile, moveCount);
+        insertFirst(move, gameLog.moves);
+
         moveCount++;
+        move = playerMove(board, width, height, matching, playerTwo, playerTwoTile, moveCount);
+        insertFirst(move, gameLog.moves);
     }
-    
 }
 
-void playerMove(Tile** board, int width, int height, char* player, char* playerTile)
+MoveLog* playerMove(Tile** board, int width, int height, int matching, char* player, char* playerTile, int moveCount)
 {
+    MoveLog* movePtr;
+    MoveLog move; /* Struct created to store the logs for moves */ 
     int row;
     int col;
     int nRead;
     int inputted;
     inputted = FALSE;
+    movePtr = &move;
     while(inputted == FALSE)
     {
         display(board, width, height);
         printf("\n%s, Please enter coords to place a %s\n", player, playerTile);
-        nRead = scanf("%d,%d", &row, &col);
+        nRead = scanf("%d,%d", &row, &col); /* this is the wrong way */
         if(nRead == 2)
         {
             /* Validates if the input value is within the board */
@@ -142,6 +160,14 @@ void playerMove(Tile** board, int width, int height, char* player, char* playerT
                 {
                     board[col][row].value = playerTile;
                     inputted = TRUE; /* Ends the loop asking for input */
+
+                    /* Stores the information for the current move in the MoveLog struct */
+                    move.player = playerTile;
+                    move.xLocation = col;
+                    move.yLocation = row;
+                    move.turn = moveCount;
+
+                    checkWin(board, width, height, matching, row, col, playerTile);
                 }
                 else
                 {
@@ -158,4 +184,64 @@ void playerMove(Tile** board, int width, int height, char* player, char* playerT
             printf("ERROR: Invalid coords inputted, please try again\n");
         }
     }
+    return movePtr;
 }
+
+
+void checkWin(Tile** board, int width, int height, int matching, int row, int col, char* playerTile)
+{
+    int count; /* Keeps count of the amount of adjacent playerTiles */
+    int colIndex;
+    int done;
+    count = 1; 
+    colIndex = 0;
+    done = FALSE; 
+    
+    /* Check Horizontal */
+    /* Iterates to the left */
+    colIndex = col - 1; /* Starts the column index to the left of the inputted tile */
+    /* Then while their is matching tiles, it will iterate to the left
+        incrementing the count */
+    while(done == FALSE && colIndex > -1) /* Checks if the tile is matching to the players tile */
+    {
+        printf("207");
+        printf("%s", playerTile);
+        if(strcmp(board[colIndex][row].value, playerTile) == 0)
+        {
+            colIndex--; /* Moves index to the left */
+            count++;
+        }
+        else
+        {
+            done = TRUE;
+        }
+    }
+
+    /* Iterates to the right */
+    done = FALSE;
+    colIndex = col + 1; /* Starts the column index to the right of the inputted tile */
+    while(done == FALSE && colIndex <= width) /* have to do this so no segmantation faults */
+    {
+        printf("224");
+        printf("Player Tile: %s\n", playerTile);
+        printf("Value: %s\n", board[colIndex][row].value); 
+        printf("%d, %d\n", col, row);
+        if(strcmp(board[colIndex][row].value, playerTile) == 0)
+        {
+            colIndex++;
+            count++;
+        }
+        else
+        {
+            done = TRUE;
+        }   
+    }
+
+    printf("COUNT: %d\n", count); 
+    if(count >= matching)
+    {
+        printf("Win by horizontal");
+    }
+
+}
+
