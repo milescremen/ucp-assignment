@@ -206,8 +206,6 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
         incrementing the count */
     while(done == FALSE && colIndex > -1) /* Checks if the tile is matching to the players tile */
     {
-        printf("207");
-        printf("%s", playerTile);
         if(strcmp(board[colIndex][row].value, playerTile) == 0)
         {
             colIndex--; /* Moves index to the left */
@@ -224,10 +222,6 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
     colIndex = col + 1; /* Starts the column index to the right of the inputted tile */
     while(done == FALSE && colIndex < width) /* have to do this so no segmantation faults */
     {
-        printf("224");
-        printf("Player Tile: %s\n", playerTile);
-        printf("Value: %s\n", board[colIndex][row].value); 
-        printf("%d, %d\n", col, row);
         if(strcmp(board[colIndex][row].value, playerTile) == 0)
         {
             colIndex++;
@@ -239,7 +233,7 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
         }   
     }
 
-    printf("COUNT: %d\n", count); 
+    printf("Horizontal COUNT: %d\n", count); 
     if(count >= matching)
     {
         printf("Win by horizontal");
@@ -272,9 +266,6 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
     rowIndex = row + 1; /* Starts the column index to the right of the inputted tile */
     while(done == FALSE && rowIndex < height) /* have to do this so no segmantation faults */
     {
-        printf("Player Tile: %s\n", playerTile);
-        printf("Value: %s\n", board[colIndex][row].value); 
-        printf("%d, %d\n", col, row);
         if(strcmp(board[col][rowIndex].value, playerTile) == 0)
         {
             rowIndex++;
@@ -286,7 +277,7 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
         }   
     }
 
-    printf("COUNT: %d\n", count); 
+    printf("Vertical COUNT: %d\n", count); 
     if(count >= matching)
     {
         printf("Win by vertical");
@@ -328,9 +319,6 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
     colIndex = col + 1;
     while(done == FALSE && rowIndex < height && colIndex < width) /* have to do this so no segmantation faults */
     {
-        printf("Player Tile: %s\n", playerTile);
-        printf("Value: %s\n", board[colIndex][row].value); 
-        printf("%d, %d\n", col, row);
         if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
         {
             rowIndex++;
@@ -343,10 +331,63 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
         }   
     }
 
-    printf("COUNT: %d\n", count); 
+    printf("Diagonal COUNT: %d\n", count); 
     if(count >= matching)
     {
-        printf("Win by Diagonal");
+        printf("Win by Diagonal\n");
+    }
+
+    /* Check Anti-Diagonal */
+    count = 1; 
+    colIndex = 0;
+    done = FALSE; 
+    
+    /* Iterates     /
+                   /
+                  / Up */
+
+    rowIndex = row - 1; /* Starts the column index to the left of the inputted tile */
+    colIndex = col + 1;
+    /* Then while their is matching tiles, it will iterate up
+        incrementing the count */
+    while(done == FALSE && rowIndex > -1 && colIndex < width) /* Checks if the tile is matching to the players tile */
+    {
+        if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
+        {
+            rowIndex--; /* Moves Up 1 diagonally */
+            colIndex++;
+            count++;
+        }
+        else
+        {
+            done = TRUE;
+        }
+    }
+    
+    /* Iterates   /
+                 /
+                / Down */
+    done = FALSE;
+    rowIndex = row + 1; /* Starts the column index to the right of the inputted tile */
+    colIndex = col - 1;
+    while(done == FALSE && rowIndex < height && colIndex > -1) /* have to do this so no segmantation faults */
+    {
+        if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
+        {
+            rowIndex++;
+            colIndex--;
+            count++;
+        }
+        else
+        {
+            done = TRUE;
+        }   
+    }
+
+    printf("Anti Diagonal COUNT: %d\n", count); 
+    if(count >= matching)
+    {
+        printf("Win by Anti Diagonal");
     }
 }
 
