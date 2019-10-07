@@ -29,11 +29,11 @@ Tile** setup(int width, int height, int matching)
     defaultTile.col = -1;
 
     /* Create the outer 2d array that holds the rows */ 
-    board = (Tile**)malloc((height) * sizeof(Tile*));
-    for(y = 0; y < height; y++)
+    board = (Tile**)malloc((width) * sizeof(Tile*));
+    for(y = 0; y < width; y++)
     {
         /* Create the inner arrays (rows) */
-        board[y] = (Tile*)malloc((width) * sizeof(Tile));
+        board[y] = (Tile*)malloc((height) * sizeof(Tile));
     }
     /* 
             Board will look like this 
@@ -47,9 +47,9 @@ Tile** setup(int width, int height, int matching)
             3 | 3,0| 3,1| 3,2| 3,3|
     */
     /* Initialize the tiles with default tile structs */
-    for(y = 0; y < height; y++)
+    for(x = 0; x < width; x++)
     {
-        for(x = 0; x < width; x++)
+        for(y = 0; y < height; y++)
         {
             board[x][y] = defaultTile;
             board[x][y].col = x;
@@ -65,7 +65,7 @@ void display(Tile** board, int width, int height)
     int i, j, k;
 
     /* Prints numbers above board */
-    for(i = 0; i <= width; i++)
+    for(i = 0; i < width; i++)
     {
         printf("   %d", i);
     }
@@ -73,7 +73,7 @@ void display(Tile** board, int width, int height)
     /* Prints first border of board */
     for(i = 0; i < width; i++)
     {
-        printf("=====");
+        printf("====");
     }
     /* Prints out the rows of the board */
     for(i = 0; i < height; i++)
@@ -83,19 +83,28 @@ void display(Tile** board, int width, int height)
         {
             /*printf(" %d,%d ", board[i][j].row, board[i][j].col);*/
             printf(" %s |", board[j][i].value); 
+            /* have to print backwards because my arrays are stored like this 
+            COLUMN ARRAY 
+            R R R           
+            O O O
+            W W W
+            1 2 3*/
         }
         printf("\n ");
-        /* Prints out the line seperators */
-        for(k = 0; k < width; k++)
+        /* Prints out the line seperators 
+            but checks that it isn't the last line */
+        if(i != height - 1)
         {
-            printf("-----");
+            for(k = 0; k < width; k++)
+            {
+                printf("----");
+            }
         }
     }   
-    printf("\n ");
     /* Prints out the base border of the game */
     for(i = 0; i < width; i++)
     {
-        printf("=====");
+        printf("====");
     }
 }
 

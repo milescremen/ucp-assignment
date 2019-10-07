@@ -1,12 +1,12 @@
 #Makefile Variables
 CC = gcc
-CFLAGS = -Wall -ansi -pedantic -Werror
+CFLAGS = -Wall -ansi -pedantic -Werror -g
 OBJ = tictactoe.o userInterface.o game.o linked_list.o
 EXEC = tictactoe
 
 #Executable creation 
 $(EXEC) : $(OBJ)
-	$(CC) $(OBJ) -o $(EXEC)
+	$(CC) $(OBJ) -o $(EXEC) -g
 
 tictactoe.o : tictactoe.c tictactoe.h
 	$(CC) tictactoe.c -c $(CFLAGS)
