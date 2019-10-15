@@ -1,5 +1,7 @@
 #include "game.h"
 #include <time.h>
+
+
 /* CAlls the other methods to run a game */
 void game(int width, int height, int matching, LinkedList* logs)
 {
@@ -7,14 +9,7 @@ void game(int width, int height, int matching, LinkedList* logs)
     board = setup(width, height, matching);
     userInput(board, width, height, matching, logs);
 }
-/*
-void logsPrinter(void* ptr)
-{   
-    GameLog move;
-    move = (GameLog)ptr;
-    printf("%s, %d, %d, %d", move.player, move.xLocation, move.yLocation, move.turn);
-}
-*/
+
 
 /* Creates the board and initializes the tiles 
     The board is constructed of a 2d array*/
@@ -82,7 +77,7 @@ void display(Tile** board, int width, int height)
         for(j = 0; j < width; j++)
         {
             /*printf(" %d,%d ", board[i][j].row, board[i][j].col);*/
-            printf(" %s |", board[j][i].value); 
+            printf(" %c |", board[j][i].value); 
             /* have to print backwards because my arrays are stored like this 
             COLUMN ARRAY 
             R R R           
@@ -116,8 +111,8 @@ void userInput(Tile** board, int width, int height, int matching, LinkedList* lo
     int maxMoves; /* Maximum of moves until game is finished */
     char* playerOne;
     char* playerTwo;
-    char* playerOneTile;    /* String containing the players tile */
-    char* playerTwoTile;
+    char playerOneTile;    /* String containing the players tile */
+    char playerTwoTile;
 
     /* Creating the linked list for the games log */
     gameLog.moves = createLinkedList();    
@@ -125,39 +120,42 @@ void userInput(Tile** board, int width, int height, int matching, LinkedList* lo
     /* Possibly store these as constants??? */
     playerOne = "Player One";
     playerTwo = "Player Two";
-    playerOneTile = "X";
-    playerTwoTile = "O";
+    playerOneTile = 'X';
+    playerTwoTile = 'O';
 
     /* Possible moves, allows calculation of when the game should end*/
     /* PROBLEM: Game just ends and doesn't print out who wins */
     maxMoves = width * height;
     moveCount = 0;
-    while(moveCount < maxMoves)
+    while(moveCount < maxMoves || winner != FALSE)
     {
         moveCount++;
         move = playerMove(board, width, height, matching, playerOne, playerOneTile, moveCount);
         insertFirst(move, gameLog.moves);
-
-        moveCount++;
-        move = playerMove(board, width, height, matching, playerTwo, playerTwoTile, moveCount);
-        insertFirst(move, gameLog.moves);
+        
+        if(winner != TRUE)
+        {
+            moveCount++;
+            move = playerMove(board, width, height, matching, playerTwo, playerTwoTile, moveCount);
+            insertFirst(move, gameLog.moves);
+        }
     }
 }
 
-MoveLog* playerMove(Tile** board, int width, int height, int matching, char* player, char* playerTile, int moveCount)
+int playerMove(Tile** board, int width, int height, int matching, char* player, char playerTile, int moveCount)
 {
-    MoveLog* movePtr;
-    MoveLog move; /* Struct created to store the logs for moves */ 
+    MoveLog* move; /* Struct created to store the logs for moves */ 
     int row;
     int col;
     int nRead;
     int inputted;
+    int winner;
+    winner = FALSE;
     inputted = FALSE;
-    movePtr = &move;
     while(inputted == FALSE)
     {
         display(board, width, height);
-        printf("\n%s, Please enter coords to place a %s\n", player, playerTile);
+        printf("\n%s, Please enter coords to place a %c\n", player, playerTile);
         nRead = scanf("%d,%d", &col, &row);
         if(nRead == 2)
         {
@@ -165,18 +163,19 @@ MoveLog* playerMove(Tile** board, int width, int height, int matching, char* pla
             if((row < height && row >= 0) && (col < width && col >= 0))
             {
                 /* Checks if the tile is occupied */
-                if(strcmp(board[col][row].value, EMPTY_TILE) == 0)
+                if(board[col][row].value == EMPTY_TILE)
                 {
                     board[col][row].value = playerTile;
                     inputted = TRUE; /* Ends the loop asking for input */
 
-                    /* Stores the information for the current move in the MoveLog struct */
-                    move.player = playerTile;
-                    move.xLocation = col;
-                    move.yLocation = row;
-                    move.turn = moveCount;
-
-                    checkWin(board, width, height, matching, row, col, playerTile);
+                    /* Stores the information for the current move in the new MoveLog struct */
+                    move = (MoveLog*)malloc(sizeof(MoveLog));
+                    move -> player = playerTile;
+                    move -> xLocation = col;
+                    move -> yLocation = row;
+                    move -> turn = moveCount;
+                     
+                    winner = checkWin(board, width, height, matching, row, col, playerTile);
                 }
                 else
                 {
@@ -193,178 +192,211 @@ MoveLog* playerMove(Tile** board, int width, int height, int matching, char* pla
             printf("ERROR: Invalid coords inputted, please try again\n");
         }
     }
-    return movePtr;
+    return move;
 }
 
+int checkWin(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+{
+    int winner;
+    if(checkHorizontal(board, width, height, matching, row, col, playerTile) == TRUE
+        || checkVertical(board, width, height, matching, row, col, playerTile) == TRUE
+        || checkDiagonal(board, width, height, matching, row, col, playerTile) == TRUE
+        || checkAntiDiagonal(board, width, height, matching, row, col, playerTile) == TRUE)
+    {
+        winner = TRUE;
+    }
+    else
+    {
+        winner = FALSE;
+    }
+    return winner;
+}
 
-void checkWin(Tile** board, int width, int height, int matching, int row, int col, char* playerTile)
+int checkHorizontal(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
 {
     int count; /* Keeps count of the amount of adjacent playerTiles */
-    int colIndex;
-    int rowIndex;
+    int leftColIndex;
+    int rightColIndex;
     int done;
-    count = 1; 
-    colIndex = 0;
-    rowIndex = 0;
-    done = FALSE; 
-    
-    /* Check Horizontal */
-    /* Iterates to the left */
-    colIndex = col - 1; /* Starts the column index to the left of the inputted tile */
-    /* Then while their is matching tiles, it will iterate to the left
-        incrementing the count */
-    while(done == FALSE && colIndex > -1) /* Checks if the tile is matching to the players tile */
-    {
-        if(strcmp(board[colIndex][row].value, playerTile) == 0)
-        {
-            colIndex--; /* Moves index to the left */
-            count++;
-        }
-        else
-        {
-            done = TRUE;
-        }
-    }
+    char winner;
 
-    /* Iterates to the right */
-    done = FALSE;
-    colIndex = col + 1; /* Starts the column index to the right of the inputted tile */
-    while(done == FALSE && colIndex < width) /* have to do this so no segmantation faults */
+    count = 1; 
+    leftColIndex = 0;
+    rightColIndex = 0;
+    done = FALSE; 
+    winner = FALSE;
+
+    /* Iterates to the left */
+    leftColIndex = col - 1; /* Starts the column index to the left of the inputted tile */
+    rightColIndex = col + 1; /* Starts the column index to the right of the inputted tile */
+    /* Then while their is matching tiles, it will iterate to the left and right
+        incrementing the count */
+    while(done == FALSE && leftColIndex > -1 && rightColIndex < width) /* Checks if the tile is matching to the players tile */
     {
-        if(strcmp(board[colIndex][row].value, playerTile) == 0)
+        if(count >= matching) /* Ends loop early */
         {
-            colIndex++;
+            done = TRUE;
+            winner = TRUE;
+        }
+        else if(board[leftColIndex][row].value == playerTile) /* Iterates left */
+        {
+            leftColIndex--; /* Moves index to the left */
+            count++;
+        }
+        else if(board[rightColIndex][row].value == playerTile) /* Iterates right */
+        {
+            rightColIndex++;
             count++;
         }
         else
         {
             done = TRUE;
-        }   
+        }
     }
 
     printf("Horizontal COUNT: %d\n", count); 
-    if(count >= matching)
-    {
-        printf("Win by horizontal");
-    }
+    return winner;
+}
 
-    /* Check vertical */
+
+int checkVertical(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+{
+    int count; /* Keeps count of the amount of adjacent playerTiles */
+    int done;
+    int upRowIndex;
+    int downRowIndex;
+    int winner;
+
     count = 1; 
-    colIndex = 0;
     done = FALSE; 
-    
+    winner = FALSE; 
+
     /* Iterates upwards */
-    rowIndex = row - 1; /* Starts the column index to the left of the inputted tile */
+    upRowIndex = row - 1; /* Starts the row index to above the inputted tile */
+    downRowIndex = row + 1; /* Starts the row index to below of the inputted tile */
+
     /* Then while their is matching tiles, it will iterate to the left
         incrementing the count */
-    while(done == FALSE && rowIndex > -1) /* Checks if the tile is matching to the players tile */
+    while(done == FALSE && upRowIndex > -1 && downRowIndex < height) /* Checks if the tile is matching to the players tile */
     {
-        if(strcmp(board[col][rowIndex].value, playerTile) == 0)
+        if(count >= matching)
         {
-            rowIndex--; /* Moves index to the left */
+            done = TRUE;
+            winner = TRUE;
+        }
+        else if(board[col][upRowIndex].value == playerTile)
+        {
+            upRowIndex--; /* Moves index to the left */
+            count++;
+        }
+        else if(board[col][downRowIndex].value == playerTile)
+        {
+            downRowIndex++;
             count++;
         }
         else
         {
             done = TRUE;
         }
-    }
-
-    /* Iterates to the right */
-    done = FALSE;
-    rowIndex = row + 1; /* Starts the column index to the right of the inputted tile */
-    while(done == FALSE && rowIndex < height) /* have to do this so no segmantation faults */
-    {
-        if(strcmp(board[col][rowIndex].value, playerTile) == 0)
-        {
-            rowIndex++;
-            count++;
-        }
-        else
-        {
-            done = TRUE;
-        }   
     }
 
     printf("Vertical COUNT: %d\n", count); 
-    if(count >= matching)
-    {
-        printf("Win by vertical");
-    }
-    
+    return winner;
+}
 
-    /* Check Diagonal */
+int checkDiagonal(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+{
+    /* Keeps count of the amount of adjacent playerTiles */
+    int count;
+    char winner;
+    /* Iterates up and to the left */
+    int upColIndex;
+    int upRowIndex;
+    /* Iterates down and to the right */
+    int downColIndex; 
+    int downRowIndex;
+    int done;
+
     count = 1; 
-    colIndex = 0;
     done = FALSE; 
-    
-    /* Iterates \
-                 \
-                  \ Up */
+    winner = FALSE;
+    /* Starts the column index to the left of the inputted tile */
+    upRowIndex = row - 1;
+    upColIndex = col - 1;
+    /* Starts the column index to the right of the inputted tile */
+    downRowIndex = row + 1;  
+    downColIndex = col + 1;
 
-    rowIndex = row - 1; /* Starts the column index to the left of the inputted tile */
-    colIndex = col - 1;
     /* Then while their is matching tiles, it will iterate up
         incrementing the count */
-    while(done == FALSE && rowIndex > -1 && colIndex > -1) /* Checks if the tile is matching to the players tile */
+    while(done == FALSE && upRowIndex > -1 && upColIndex > -1 && downRowIndex < height && downColIndex < width) /* Checks if the tile is matching to the players tile */
     {
-        if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
+        if(count >= matching)
         {
-            rowIndex--; /* Moves Up 1 diagonally */
-            colIndex--;
+            done = TRUE;
+            winner = TRUE;
+        }
+        else if(board[upColIndex][upRowIndex].value == playerTile)
+        {
+            upRowIndex--; /* Moves Up 1 diagonally */
+            upColIndex--;
+            count++;
+        }
+        else if(board[downColIndex][downRowIndex].value == playerTile)
+        {
+            downRowIndex++;
+            downColIndex++;
             count++;
         }
         else
         {
             done = TRUE;
         }
-    }
-    
-    /* Iterates \
-                 \
-                  \ Down */
-    done = FALSE;
-    rowIndex = row + 1; /* Starts the column index to the right of the inputted tile */
-    colIndex = col + 1;
-    while(done == FALSE && rowIndex < height && colIndex < width) /* have to do this so no segmantation faults */
-    {
-        if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
-        {
-            rowIndex++;
-            colIndex++;
-            count++;
-        }
-        else
-        {
-            done = TRUE;
-        }   
     }
 
     printf("Diagonal COUNT: %d\n", count); 
-    if(count >= matching)
-    {
-        printf("Win by Diagonal\n");
-    }
+    return winner;
+}
 
-    /* Check Anti-Diagonal */
+
+int checkAntiDiagonal(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+{
+    int count; /* Keeps count of the amount of adjacent playerTiles */
+    int done;
+    int winner;
+    /* Iterates up and to the right */
+    int upColIndex;
+    int upRowIndex;
+    /* Iterates down and to the left */
+    int downColIndex;
+    int downRowIndex;
     count = 1; 
-    colIndex = 0;
     done = FALSE; 
-    
-    /* Iterates     /
-                   /
-                  / Up */
+    winner = FALSE;
 
-    rowIndex = row - 1; /* Starts the column index to the left of the inputted tile */
-    colIndex = col + 1;
+    upRowIndex = row - 1; /* Starts the column index to the left of the inputted tile */
+    upColIndex = col + 1;
+    downRowIndex = row + 1; /* Starts the column index to the right of the inputted tile */
+    downColIndex = col - 1;
     /* Then while their is matching tiles, it will iterate up
         incrementing the count */
-    while(done == FALSE && rowIndex > -1 && colIndex < width) /* Checks if the tile is matching to the players tile */
+    while(done == FALSE && upRowIndex > -1 && upColIndex < width && downRowIndex < height && downColIndex > -1) /* Checks if the tile is matching to the players tile */
     {
-        if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
+        if(count >= matching)
         {
-            rowIndex--; /* Moves Up 1 diagonally */
-            colIndex++;
+            done = TRUE;
+            winner = TRUE;
+        } 
+        else if(board[upColIndex][upRowIndex].value == playerTile)
+        {
+            upRowIndex--; /* Moves Up 1 diagonally */
+            upColIndex++;
+            count++;
+        }
+        else if(board[downColIndex][downRowIndex].value == playerTile)
+        {
+            downRowIndex++;
+            downColIndex--;
             count++;
         }
         else
@@ -373,30 +405,9 @@ void checkWin(Tile** board, int width, int height, int matching, int row, int co
         }
     }
     
-    /* Iterates   /
-                 /
-                / Down */
-    done = FALSE;
-    rowIndex = row + 1; /* Starts the column index to the right of the inputted tile */
-    colIndex = col - 1;
-    while(done == FALSE && rowIndex < height && colIndex > -1) /* have to do this so no segmantation faults */
-    {
-        if(strcmp(board[colIndex][rowIndex].value, playerTile) == 0)
-        {
-            rowIndex++;
-            colIndex--;
-            count++;
-        }
-        else
-        {
-            done = TRUE;
-        }   
-    }
-
     printf("Anti Diagonal COUNT: %d\n", count); 
-    if(count >= matching)
-    {
-        printf("Win by Anti Diagonal");
-    }
+    return winner;
 }
+
+
 

@@ -4,7 +4,7 @@ void userInterface(int width, int height, int matching)
     int userInput;
     char line[255];
     LinkedList* logs;
-    logs = createLinkedList();
+    logs = createLinkedList(logsPrinter, logsFree);
     printf("Welcome to Tic Tac Toe\n");
     do
     {
@@ -44,7 +44,7 @@ void userInterface(int width, int height, int matching)
                 viewCurrentLogs(); 
                 break;
             case 4:
-                saveLogsToFile();
+                saveLogsToFile(logs);
                 break;
             case 5:
                 printf("Goodbye\n");
@@ -64,7 +64,7 @@ void viewCurrentLogs()
     printf("Not implemented yet");
 }
 
-void saveLogsToFile()
+void saveLogsToFile(LinkedList* logs)
 {
     printf("Not implemented yet");
 }

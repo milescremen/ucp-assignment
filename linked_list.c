@@ -1,12 +1,15 @@
 #include "linked_list.h"
+#include "userInterface.h"
 
 /* Linked List */
-LinkedList* createLinkedList()
+LinkedList* createLinkedList(Print printFuncPtr, Free freeFuncPtr)
 {
     LinkedList* newList = (LinkedList*)malloc(sizeof(LinkedList));
     newList -> head = NULL;
     newList -> tail = NULL;
     newList -> size = 0;
+    newList -> printFunc = printFuncPtr;
+    newList -> freeFunc = freeFuncPtr;
     return newList;
 }
 
@@ -119,7 +122,7 @@ void* removeLast(LinkedList* list)
     return removedData;
 }
 
-void printLinkedList(LinkedList* list, Print print)
+void printLinkedList(LinkedList* list)
 {   
     Node* currentNode;
     currentNode = list -> head;
@@ -128,12 +131,12 @@ void printLinkedList(LinkedList* list, Print print)
     {
         /* printf("%s\n", (char*)(currentNode -> data)); */
         /* Updates the currentNode to its next, traversing the list */
-        (*print)(currentNode -> data);
+        (*list -> printFunc)(currentNode -> data);
         currentNode = currentNode -> next;
     }
 }
 
-void freeLinkedList(LinkedList* list, Free free)
+void freeLinkedList(LinkedList* list)
 {
     Node* currentNode;
     Node* nextNode;
@@ -146,9 +149,21 @@ void freeLinkedList(LinkedList* list, Free free)
     {
         nextNode = currentNode -> next;
         /* free(currentNode); */
-        (*free)(currentNode);
+        (*list -> freeFunc)(currentNode);
         currentNode = nextNode;
     }
     free(list);
 }
 
+
+void logsPrinter(void* ptr)
+{   
+    MoveLog* move;
+    move = (MoveLog*)ptr;
+    printf("%c, %d, %d, %d", move -> player, move -> xLocation, move -> yLocation, move -> turn);
+}
+
+void logsFree(void)
+{
+
+}

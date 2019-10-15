@@ -7,24 +7,25 @@
 #include <stdio.h>
 
 
+typedef void (*Print)(void*);
+typedef void (*Free)();
+
 /* Typedef's */
-typedef struct ListNode
-{
+typedef struct ListNode {
     void* data;
     struct ListNode* next;
     struct ListNode* prev;
 } Node;
 
-typedef struct LinkedList
-{
+typedef struct LinkedList {
     struct ListNode* head;
     struct ListNode* tail;
     int size;
+    Print printFunc;
+    Free freeFunc;
 } LinkedList;
 
 
-typedef void (*Print)(void*);
-typedef void (*Free)();
 
 /* Forward declaration */
 
@@ -33,9 +34,9 @@ void insertFirst(void* inData, LinkedList* list);
 void insertLast(void* inData, LinkedList* list);
 void* removeFirst(LinkedList* list);
 void* removeLast(LinkedList* list);
-void printLinkedList(LinkedList* list, Print print);
-void freeLinkedList(LinkedList* list, Free free);
+void printLinkedList(LinkedList* list);
+void freeLinkedList(LinkedList* list);
 
-
-void printString(void* ptr);
+void logsFree(void);
+void logsPrinter(void* ptr);
 #endif
