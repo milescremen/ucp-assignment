@@ -32,8 +32,9 @@ typedef struct {
 
 /* Forward Declarations */
 void game(Settings* settings, LinkedList* logs);
-Tile** setup(Settings* settings);
-void display(Tile** board, Settings* settings);
+Tile** setupBoard(Settings* settings);
+void freeBoard(Tile** board, Settings* settings);
+void displayBoard(Tile** board, Settings* settings);
 void userInput(Tile** board, Settings* settings, LinkedList* logs);
 int playerMove(Tile** board, Settings* settings, char* player, char playerTile, int moveCount, int gameCount, LinkedList* logs);
 

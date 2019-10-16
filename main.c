@@ -1,5 +1,6 @@
 #include "filemanager.h"
 #include "userinterface.h"
+/* PROBS CREATE THE LOGS IN MAIN? NOT USER INTERFACE IDK */
 int main(int argc, char* argv[])
 {
     Settings* settings;
@@ -16,6 +17,7 @@ int main(int argc, char* argv[])
         {
             userInterface(settings);
         }
+        free(settings);
     }
     else
     {

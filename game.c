@@ -20,7 +20,7 @@ void game(Settings* settings, LinkedList* logs)
     gameCount++;
 
     /* Sets up the board */
-    board = setup(settings);
+    board = setupBoard(settings);
     winner = FALSE;
 
     /* Possibly store these as constants??? */
@@ -53,20 +53,21 @@ void game(Settings* settings, LinkedList* logs)
         /* Player one always goes first, so we mod to find the winner */
         if(moveCount % maxMoves != 0)
         {
-            display(board, settings);
+            displayBoard(board, settings);
             printf("\nPlayer One is the winner!!!\n");
         }
         else
         {
-            display(board, settings);
+            displayBoard(board, settings);
             printf("\nPlayer Two is the winner!!!\n");
         }
     }
     else
     {
-        display(board, settings);
+        displayBoard(board, settings);
         printf("\nIts a draw :(\n");
     }
+    freeBoard(board, settings); 
 }
 
 /* Creates the board and initializes the tiles 
@@ -83,7 +84,7 @@ void game(Settings* settings, LinkedList* logs)
             3 | 3,0| 3,1| 3,2| 3,3|
     */
 
-Tile** setup(Settings* settings)
+Tile** setupBoard(Settings* settings)
 {
     int x,y;                                            
     Tile** board;
@@ -113,8 +114,19 @@ Tile** setup(Settings* settings)
     return board;  
 }
 
+void freeBoard(Tile** board, Settings* settings)
+{
+    int y;
+    for(y = 0; y < settings -> width; y++)
+    {
+        /* Free the inner arrays (rows) */
+        free(board[y]);
+    }
+    free(board);
+}
+
 /* Prints out the Board */
-void display(Tile** board, Settings* settings)
+void displayBoard(Tile** board, Settings* settings)
 {
     int i, j, k;
 
@@ -174,7 +186,7 @@ int playerMove(Tile** board, Settings* settings, char* player, char playerTile, 
     inputted = FALSE;
     while(inputted == FALSE)
     {
-        display(board, settings);
+        displayBoard(board, settings);
         printf("\n%s, Please enter coords to place a %c\n", player, playerTile);
         nRead = scanf("%d,%d", &col, &row);
         if(nRead == 2)

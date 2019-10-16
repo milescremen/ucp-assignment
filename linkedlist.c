@@ -161,7 +161,7 @@ void freeLinkedList(LinkedList* list)
     while(currentNode != NULL)
     {
         nextNode = currentNode -> next;
-        /* free(currentNode); */
+        /*free(currentNode); */
         (*list -> freeFunc)(currentNode);
         currentNode = nextNode;
     }
@@ -201,4 +201,4 @@ void logsFree(void* ptr)
         the logs struct. 
         But just to show that it would work as a generic linked list */
     free(move);
-}
+} 

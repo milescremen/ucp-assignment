@@ -49,6 +49,7 @@ void userInterface(Settings* settings)
                 break;
             case 5:
                 printf("Goodbye\n");
+                freeLinkedList(logs);
                 break;
         }
     } while(userInput != 5);
