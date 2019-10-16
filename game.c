@@ -1,35 +1,76 @@
 #include "game.h"
-#include <time.h>
 
 
-/* CAlls the other methods to run a game */
-void game(int width, int height, int matching, LinkedList* logs)
+/* FOR SOME REASON IF I ENTER 0,02 it stills works as 0,2 */
+
+/* Calls the other methods to run a game */
+void game(Settings* settings, LinkedList* logs)
 {
     Tile** board;
-    board = setup(width, height, matching);
-    userInput(board, width, height, matching, logs);
-}
+    int moveCount; /* Current number of moves */
+    int maxMoves; /* Maximum of moves until game is finished */
+    char* playerOne;
+    char* playerTwo;
+    char playerOneTile;    /* String containing the players tile */
+    char playerTwoTile;
+    int winner;
 
+    /* Static variable keeps the number of games played for logging purposes */ 
+    static int gameCount;
+    gameCount++;
+
+    /* Sets up the board */
+    board = setup(settings);
+    winner = FALSE;
+
+    /* Possibly store these as constants??? */
+    playerOne = "Player One";
+    playerTwo = "Player Two";
+    playerOneTile = 'X';
+    playerTwoTile = 'O';
+
+    /* Possible moves, allows calculation of when the game should end*/
+
+    maxMoves = (settings -> width) * (settings -> height);
+    moveCount = 0;
+    while(moveCount < maxMoves && winner == FALSE) /* DOUBLE CHECK THE LAST MOVE */
+    {
+        moveCount++;
+        winner = playerMove(board, settings, playerOne, playerOneTile, moveCount, gameCount, logs);
+        /* Checks that player one hasn't won the game */
+
+        printf("move %d\n", moveCount);
+        if(moveCount < maxMoves && winner == FALSE)
+        {
+            moveCount++;
+            winner = playerMove(board, settings, playerTwo, playerTwoTile, moveCount, gameCount, logs);
+        }
+    }
+
+    /* The game has ended after the while loop finishes, so now to check who won */
+    if(winner == TRUE)
+    {
+        /* Player one always goes first, so we mod to find the winner */
+        if(moveCount % maxMoves != 0)
+        {
+            display(board, settings);
+            printf("\nPlayer One is the winner!!!\n");
+        }
+        else
+        {
+            display(board, settings);
+            printf("\nPlayer Two is the winner!!!\n");
+        }
+    }
+    else
+    {
+        display(board, settings);
+        printf("\nIts a draw :(\n");
+    }
+}
 
 /* Creates the board and initializes the tiles 
     The board is constructed of a 2d array*/
-Tile** setup(int width, int height, int matching)
-{
-    int x,y; 
-    Tile** board;
-    Tile defaultTile;
-
-    defaultTile.value = EMPTY_TILE;
-    defaultTile.row = -1;
-    defaultTile.col = -1;
-
-    /* Create the outer 2d array that holds the rows */ 
-    board = (Tile**)malloc((width) * sizeof(Tile*));
-    for(y = 0; y < width; y++)
-    {
-        /* Create the inner arrays (rows) */
-        board[y] = (Tile*)malloc((height) * sizeof(Tile));
-    }
     /* 
             Board will look like this 
             Where X = Column and Y = Row 
@@ -41,10 +82,28 @@ Tile** setup(int width, int height, int matching)
             2 | 2,0| 2,1| 2,2| 2,3|
             3 | 3,0| 3,1| 3,2| 3,3|
     */
-    /* Initialize the tiles with default tile structs */
-    for(x = 0; x < width; x++)
+
+Tile** setup(Settings* settings)
+{
+    int x,y;                                            
+    Tile** board;
+    Tile defaultTile;
+
+    defaultTile.value = EMPTY_TILE;
+    defaultTile.row = -1;
+    defaultTile.col = -1;
+
+    /* Create the outer 2d array that holds the rows */ 
+    board = (Tile**)malloc((settings -> width) * sizeof(Tile*));
+    for(y = 0; y < settings -> width; y++)
     {
-        for(y = 0; y < height; y++)
+        /* Create the inner arrays (rows) */
+        board[y] = (Tile*)malloc((settings -> height) * sizeof(Tile));
+    }
+    /* Initialize the tiles with default tile structs */
+    for(x = 0; x < settings -> width; x++)
+    {
+        for(y = 0; y < settings -> height; y++)
         {
             board[x][y] = defaultTile;
             board[x][y].col = x;
@@ -55,26 +114,26 @@ Tile** setup(int width, int height, int matching)
 }
 
 /* Prints out the Board */
-void display(Tile** board, int width, int height)
+void display(Tile** board, Settings* settings)
 {
     int i, j, k;
 
     /* Prints numbers above board */
-    for(i = 0; i < width; i++)
+    for(i = 0; i < settings -> width; i++)
     {
         printf("   %d", i);
     }
     printf("\n ");
     /* Prints first border of board */
-    for(i = 0; i < width; i++)
+    for(i = 0; i < settings -> width; i++)
     {
         printf("====");
     }
     /* Prints out the rows of the board */
-    for(i = 0; i < height; i++)
+    for(i = 0; i < settings -> height; i++)
     {
         printf("\n%d|", i);
-        for(j = 0; j < width; j++)
+        for(j = 0; j < settings -> width; j++)
         {
             /*printf(" %d,%d ", board[i][j].row, board[i][j].col);*/
             printf(" %c |", board[j][i].value); 
@@ -88,61 +147,22 @@ void display(Tile** board, int width, int height)
         printf("\n ");
         /* Prints out the line seperators 
             but checks that it isn't the last line */
-        if(i != height - 1)
+        if(i != (settings -> height - 1))
         {
-            for(k = 0; k < width; k++)
+            for(k = 0; k < settings -> width; k++)
             {
                 printf("----");
             }
         }
     }   
     /* Prints out the base border of the game */
-    for(i = 0; i < width; i++)
+    for(i = 0; i < settings -> width; i++)
     {
         printf("====");
     }
 }
 
-void userInput(Tile** board, int width, int height, int matching, LinkedList* logs)
-{
-    GameLog gameLog;
-    MoveLog* move; 
-    int moveCount; /* Current number of moves */
-    int maxMoves; /* Maximum of moves until game is finished */
-    char* playerOne;
-    char* playerTwo;
-    char playerOneTile;    /* String containing the players tile */
-    char playerTwoTile;
-
-    /* Creating the linked list for the games log */
-    gameLog.moves = createLinkedList();    
-
-    /* Possibly store these as constants??? */
-    playerOne = "Player One";
-    playerTwo = "Player Two";
-    playerOneTile = 'X';
-    playerTwoTile = 'O';
-
-    /* Possible moves, allows calculation of when the game should end*/
-    /* PROBLEM: Game just ends and doesn't print out who wins */
-    maxMoves = width * height;
-    moveCount = 0;
-    while(moveCount < maxMoves || winner != FALSE)
-    {
-        moveCount++;
-        move = playerMove(board, width, height, matching, playerOne, playerOneTile, moveCount);
-        insertFirst(move, gameLog.moves);
-        
-        if(winner != TRUE)
-        {
-            moveCount++;
-            move = playerMove(board, width, height, matching, playerTwo, playerTwoTile, moveCount);
-            insertFirst(move, gameLog.moves);
-        }
-    }
-}
-
-int playerMove(Tile** board, int width, int height, int matching, char* player, char playerTile, int moveCount)
+int playerMove(Tile** board, Settings* settings, char* player, char playerTile, int moveCount, int gameCount, LinkedList* logs)
 {
     MoveLog* move; /* Struct created to store the logs for moves */ 
     int row;
@@ -154,13 +174,13 @@ int playerMove(Tile** board, int width, int height, int matching, char* player, 
     inputted = FALSE;
     while(inputted == FALSE)
     {
-        display(board, width, height);
+        display(board, settings);
         printf("\n%s, Please enter coords to place a %c\n", player, playerTile);
         nRead = scanf("%d,%d", &col, &row);
         if(nRead == 2)
         {
             /* Validates if the input value is within the board */
-            if((row < height && row >= 0) && (col < width && col >= 0))
+            if((row < settings -> height && row >= 0) && (col < settings -> width && col >= 0))
             {
                 /* Checks if the tile is occupied */
                 if(board[col][row].value == EMPTY_TILE)
@@ -170,12 +190,13 @@ int playerMove(Tile** board, int width, int height, int matching, char* player, 
 
                     /* Stores the information for the current move in the new MoveLog struct */
                     move = (MoveLog*)malloc(sizeof(MoveLog));
+                    move -> game = gameCount;
                     move -> player = playerTile;
                     move -> xLocation = col;
                     move -> yLocation = row;
                     move -> turn = moveCount;
-                     
-                    winner = checkWin(board, width, height, matching, row, col, playerTile);
+                    insertLast(move, logs);
+                    winner = checkWin(board, settings, row, col, playerTile);
                 }
                 else
                 {
@@ -192,16 +213,16 @@ int playerMove(Tile** board, int width, int height, int matching, char* player, 
             printf("ERROR: Invalid coords inputted, please try again\n");
         }
     }
-    return move;
+    return winner;
 }
 
-int checkWin(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+int checkWin(Tile** board, Settings* settings, int row, int col, char playerTile)
 {
     int winner;
-    if(checkHorizontal(board, width, height, matching, row, col, playerTile) == TRUE
-        || checkVertical(board, width, height, matching, row, col, playerTile) == TRUE
-        || checkDiagonal(board, width, height, matching, row, col, playerTile) == TRUE
-        || checkAntiDiagonal(board, width, height, matching, row, col, playerTile) == TRUE)
+    if(checkHorizontal(board, settings, row, col, playerTile) == TRUE
+        || checkVertical(board, settings, row, col, playerTile) == TRUE
+        || checkDiagonal(board, settings, row, col, playerTile) == TRUE
+        || checkAntiDiagonal(board, settings, row, col, playerTile) == TRUE)
     {
         winner = TRUE;
     }
@@ -212,7 +233,7 @@ int checkWin(Tile** board, int width, int height, int matching, int row, int col
     return winner;
 }
 
-int checkHorizontal(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+int checkHorizontal(Tile** board, Settings* settings, int row, int col, char playerTile)
 {
     int count; /* Keeps count of the amount of adjacent playerTiles */
     int leftColIndex;
@@ -231,14 +252,9 @@ int checkHorizontal(Tile** board, int width, int height, int matching, int row, 
     rightColIndex = col + 1; /* Starts the column index to the right of the inputted tile */
     /* Then while their is matching tiles, it will iterate to the left and right
         incrementing the count */
-    while(done == FALSE && leftColIndex > -1 && rightColIndex < width) /* Checks if the tile is matching to the players tile */
+    while(done == FALSE && leftColIndex > -1 && rightColIndex < settings -> width) /* Checks if the tile is matching to the players tile */
     {
-        if(count >= matching) /* Ends loop early */
-        {
-            done = TRUE;
-            winner = TRUE;
-        }
-        else if(board[leftColIndex][row].value == playerTile) /* Iterates left */
+        if(board[leftColIndex][row].value == playerTile) /* Iterates left */
         {
             leftColIndex--; /* Moves index to the left */
             count++;
@@ -252,14 +268,22 @@ int checkHorizontal(Tile** board, int width, int height, int matching, int row, 
         {
             done = TRUE;
         }
+
+        if(count >= settings -> matching) /* Ends loop early if winner is found*/
+        {
+            done = TRUE;
+            winner = TRUE;
+        }
     }
 
-    printf("Horizontal COUNT: %d\n", count); 
+
+
+    /* printf("Horizontal COUNT: %d\n", count); */
     return winner;
 }
 
 
-int checkVertical(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+int checkVertical(Tile** board, Settings* settings, int row, int col, char playerTile)
 {
     int count; /* Keeps count of the amount of adjacent playerTiles */
     int done;
@@ -277,9 +301,9 @@ int checkVertical(Tile** board, int width, int height, int matching, int row, in
 
     /* Then while their is matching tiles, it will iterate to the left
         incrementing the count */
-    while(done == FALSE && upRowIndex > -1 && downRowIndex < height) /* Checks if the tile is matching to the players tile */
+    while(done == FALSE && upRowIndex > -1 && downRowIndex < settings -> height) /* Checks if the tile is matching to the players tile */
     {
-        if(count >= matching)
+        if(count >= settings -> matching)
         {
             done = TRUE;
             winner = TRUE;
@@ -300,11 +324,11 @@ int checkVertical(Tile** board, int width, int height, int matching, int row, in
         }
     }
 
-    printf("Vertical COUNT: %d\n", count); 
+    /* printf("Vertical COUNT: %d\n", count); */
     return winner;
 }
 
-int checkDiagonal(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+int checkDiagonal(Tile** board, Settings* settings, int row, int col, char playerTile)
 {
     /* Keeps count of the amount of adjacent playerTiles */
     int count;
@@ -329,9 +353,9 @@ int checkDiagonal(Tile** board, int width, int height, int matching, int row, in
 
     /* Then while their is matching tiles, it will iterate up
         incrementing the count */
-    while(done == FALSE && upRowIndex > -1 && upColIndex > -1 && downRowIndex < height && downColIndex < width) /* Checks if the tile is matching to the players tile */
+    while(done == FALSE && upRowIndex > -1 && upColIndex > -1 && downRowIndex < settings -> height && downColIndex < settings -> width) /* Checks if the tile is matching to the players tile */
     {
-        if(count >= matching)
+        if(count >= settings -> matching)
         {
             done = TRUE;
             winner = TRUE;
@@ -354,12 +378,12 @@ int checkDiagonal(Tile** board, int width, int height, int matching, int row, in
         }
     }
 
-    printf("Diagonal COUNT: %d\n", count); 
+    /* printf("Diagonal COUNT: %d\n", count); */
     return winner;
 }
 
 
-int checkAntiDiagonal(Tile** board, int width, int height, int matching, int row, int col, char playerTile)
+int checkAntiDiagonal(Tile** board, Settings* settings, int row, int col, char playerTile)
 {
     int count; /* Keeps count of the amount of adjacent playerTiles */
     int done;
@@ -380,9 +404,9 @@ int checkAntiDiagonal(Tile** board, int width, int height, int matching, int row
     downColIndex = col - 1;
     /* Then while their is matching tiles, it will iterate up
         incrementing the count */
-    while(done == FALSE && upRowIndex > -1 && upColIndex < width && downRowIndex < height && downColIndex > -1) /* Checks if the tile is matching to the players tile */
+    while(done == FALSE && upRowIndex > -1 && upColIndex < settings -> width && downRowIndex < settings ->height && downColIndex > -1) /* Checks if the tile is matching to the players tile */
     {
-        if(count >= matching)
+        if(count >= settings -> matching)
         {
             done = TRUE;
             winner = TRUE;
@@ -405,9 +429,8 @@ int checkAntiDiagonal(Tile** board, int width, int height, int matching, int row
         }
     }
     
-    printf("Anti Diagonal COUNT: %d\n", count); 
+    /* printf("Anti Diagonal COUNT: %d\n", count); */
     return winner;
 }
-
 
 

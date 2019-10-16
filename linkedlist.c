@@ -1,8 +1,8 @@
-#include "linked_list.h"
+#include "linkedlist.h"
 #include "userInterface.h"
 
 /* Linked List */
-LinkedList* createLinkedList(Print printFuncPtr, Free freeFuncPtr)
+LinkedList* createLinkedList(Print printFuncPtr, Free freeFuncPtr, Output outputFuncPtr)
 {
     LinkedList* newList = (LinkedList*)malloc(sizeof(LinkedList));
     newList -> head = NULL;
@@ -10,6 +10,7 @@ LinkedList* createLinkedList(Print printFuncPtr, Free freeFuncPtr)
     newList -> size = 0;
     newList -> printFunc = printFuncPtr;
     newList -> freeFunc = freeFuncPtr;
+    newList -> outputFunc = outputFuncPtr;
     return newList;
 }
 
@@ -136,6 +137,18 @@ void printLinkedList(LinkedList* list)
     }
 }
 
+void outputListToFile(LinkedList* list, FILE* f)
+{
+    Node* currentNode;
+    currentNode = list -> head;
+
+    while(currentNode != NULL)
+    {
+        (*list -> outputFunc)(currentNode -> data, f);
+        currentNode = currentNode -> next;
+    }
+}
+
 void freeLinkedList(LinkedList* list)
 {
     Node* currentNode;
@@ -155,15 +168,37 @@ void freeLinkedList(LinkedList* list)
     free(list);
 }
 
-
 void logsPrinter(void* ptr)
 {   
     MoveLog* move;
     move = (MoveLog*)ptr;
-    printf("%c, %d, %d, %d", move -> player, move -> xLocation, move -> yLocation, move -> turn);
+    if(move -> turn == 1)
+    {
+        printf("Game: %d\n", move -> game);
+    }
+    printf("  Turn: %d\n  Player: %c\n  Location: %d,%d\n\n", 
+        move -> turn, move -> player, move -> xLocation, move -> yLocation);
 }
 
-void logsFree(void)
-{
 
+void logsOutputToFile(void* ptr, FILE* f)
+{   
+    MoveLog* move;
+    move = (MoveLog*)ptr;
+    if(move -> turn == 1)
+    {
+        fprintf(f,"Game: %d\n", move -> game);
+    }
+    fprintf(f, "  Turn: %d\n  Player: %c\n  Location: %d,%d\n\n", 
+        move -> turn, move -> player, move -> xLocation, move -> yLocation);
+}
+
+void logsFree(void* ptr)
+{
+    MoveLog* move;
+    move = (MoveLog*)ptr;
+    /* This isn't necessary because there isn't any malloced data inside
+        the logs struct. 
+        But just to show that it would work as a generic linked list */
+    free(move);
 }

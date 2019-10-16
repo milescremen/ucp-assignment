@@ -1,6 +1,4 @@
 
-
-
 #ifndef GAME_H
 #define GAME_H
 
@@ -8,7 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "linked_list.h"
+#include "linkedlist.h"
+#include <time.h>
+#include "filemanager.h"
 
 /* Defines */
 #define FALSE 0
@@ -23,11 +23,7 @@ typedef struct {
 } Tile;
 
 typedef struct {
-   int gameNum;
-   LinkedList* moves;
-} GameLog;
-
-typedef struct {
+   int game;
    int turn;
    char player;
    int xLocation;
@@ -35,15 +31,15 @@ typedef struct {
 } MoveLog;
 
 /* Forward Declarations */
-void game(int width, int height, int matching, LinkedList* logs);
-Tile** setup(int width, int height, int matching);
-void display(Tile** board, int width, int height);
-void userInput(Tile** board, int width, int height, int matching, LinkedList* logs);
-int playerMove(Tile** board, int width, int height, int matching, char* player, char playerTile, int moveCount);
+void game(Settings* settings, LinkedList* logs);
+Tile** setup(Settings* settings);
+void display(Tile** board, Settings* settings);
+void userInput(Tile** board, Settings* settings, LinkedList* logs);
+int playerMove(Tile** board, Settings* settings, char* player, char playerTile, int moveCount, int gameCount, LinkedList* logs);
 
-int checkWin(Tile** board, int width, int height, int matching, int row, int col, char playerTile);
-int checkHorizontal(Tile** board, int width, int height, int matching, int row, int col, char playerTile);
-int checkVertical(Tile** board, int width, int height, int matching, int row, int col, char playerTile);
-int checkDiagonal(Tile** board, int width, int height, int matching, int row, int col, char playerTile);
-int checkAntiDiagonal(Tile** board, int width, int height, int matching, int row, int col, char playerTile);
+int checkWin(Tile** board, Settings* settings, int row, int col, char playerTile);
+int checkHorizontal(Tile** board, Settings* settings, int row, int col, char playerTile);
+int checkVertical(Tile** board, Settings* settings, int row, int col, char playerTile);
+int checkDiagonal(Tile** board, Settings* settings, int row, int col, char playerTile);
+int checkAntiDiagonal(Tile** board, Settings* settings, int row, int col, char playerTile);
 #endif

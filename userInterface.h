@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "linked_list.h"
+#include "linkedlist.h"
 #include "game.h"
 
 /* Defines */
@@ -16,8 +16,8 @@
 /* Typedefs */
 
 /* Forward Declarations */
-void userInterface(int width, int height, int matching);
-void viewSettings(int width, int height, int matching);
+void userInterface(Settings* settings);
+void viewSettings(Settings* settings);
 void viewCurrentLogs();
 void saveLogsToFile();
 #endif

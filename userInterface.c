@@ -1,10 +1,11 @@
-#include "userInterface.h"
-void userInterface(int width, int height, int matching)
+#include "userinterface.h"
+#include <time.h>
+void userInterface(Settings* settings)
 {
     int userInput;
     char line[255];
     LinkedList* logs;
-    logs = createLinkedList(logsPrinter, logsFree);
+    logs = createLinkedList(logsPrinter, logsFree, logsOutputToFile);
     printf("Welcome to Tic Tac Toe\n");
     do
     {
@@ -35,16 +36,16 @@ void userInterface(int width, int height, int matching)
         switch(userInput)
         {
             case 1:
-                game(width, height, matching, logs);
+                game(settings, logs);
                 break;
             case 2:
-                viewSettings(width, height, matching);
+                viewSettings(settings);
                 break;
             case 3:
-                viewCurrentLogs(); 
+                viewCurrentLogs(settings, logs); 
                 break;
             case 4:
-                saveLogsToFile(logs);
+                saveLogsToFile(settings, logs);
                 break;
             case 5:
                 printf("Goodbye\n");
@@ -53,18 +54,56 @@ void userInterface(int width, int height, int matching)
     } while(userInput != 5);
 }
 
-void viewSettings(int width, int height, int matching)
+void viewSettings(Settings* settings)
 {
     printf("Settings:\n");
-    printf("Width (M): %d\nHeight(N): %d\nMatching(K): %d\n", width, height, matching);
+    printf("Width (M): %d\nHeight(N): %d\nMatching(K): %d\n", settings -> width, settings -> height, settings -> matching);
 }
 
-void viewCurrentLogs()
+void viewCurrentLogs(Settings* settings, LinkedList* logs)
 {
-    printf("Not implemented yet");
+    viewSettings(settings);
+    printLinkedList(logs);
 }
 
-void saveLogsToFile(LinkedList* logs)
+void saveLogsToFile(Settings* settings, LinkedList* logs)
 {
-    printf("Not implemented yet");
+    int hours, minutes, day, month;
+    FILE* f;
+    char fileName[50]; /* consider changing */
+    /* NEED TO CHECK IF THIS IS THE PROPER WAY */
+    time_t now;
+    struct tm* local;
+    time(&now);
+    local = localtime(&now);
+
+    hours = local -> tm_hour;
+    minutes = local -> tm_min;
+    day = local -> tm_mday;
+    month = local -> tm_mon + 1;
+
+    printf("Today is: %s\n", ctime(&now));
+
+    /* NOT ENTIRELY SURE WHY BUT HOURS AND MINUTES ARE WRONG WAY ROUND */
+    sprintf(fileName, "MNK_%d-%d-%d_%02d-%02d_%02d-%02d.log", settings -> width, 
+            settings -> height, settings -> matching, hours, minutes, day, month);
+    f = fopen(fileName, "w");
+    
+    if(f != NULL)
+    {
+        outputListToFile(logs, f);
+        fclose(f);
+    }
+    else
+    {
+        printf("FILE ERROR");
+        /*perror();*/
+    }
 }
+/*
+void exitCleanup()
+{
+    freeLinkedList(logs);
+
+}
+*/

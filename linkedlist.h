@@ -8,7 +8,8 @@
 
 
 typedef void (*Print)(void*);
-typedef void (*Free)();
+typedef void (*Free)(void*);
+typedef void(*Output)(void*, FILE* f);
 
 /* Typedef's */
 typedef struct ListNode {
@@ -23,13 +24,14 @@ typedef struct LinkedList {
     int size;
     Print printFunc;
     Free freeFunc;
+    Output outputFunc;
 } LinkedList;
 
 
 
 /* Forward declaration */
 
-LinkedList* createLinkedList();
+LinkedList* createLinkedList(Print print, Free free, Output output);
 void insertFirst(void* inData, LinkedList* list);
 void insertLast(void* inData, LinkedList* list);
 void* removeFirst(LinkedList* list);
@@ -37,6 +39,9 @@ void* removeLast(LinkedList* list);
 void printLinkedList(LinkedList* list);
 void freeLinkedList(LinkedList* list);
 
-void logsFree(void);
+void outputListToFile(LinkedList* list, FILE* f);
 void logsPrinter(void* ptr);
+void logsFree(void* ptr);
+void logsOutputToFile(void* ptr, FILE* f);
+
 #endif
