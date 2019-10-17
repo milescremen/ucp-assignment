@@ -16,8 +16,8 @@
 /* Typedefs */
 
 /* Forward Declarations */
-void userInterface(Settings* settings);
+void userInterface(Settings* settings, LinkedList* logs);
 void viewSettings(Settings* settings);
 void viewCurrentLogs();
-void saveLogsToFile();
+
 #endif

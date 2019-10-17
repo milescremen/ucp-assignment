@@ -137,17 +137,6 @@ void printLinkedList(LinkedList* list)
     }
 }
 
-void outputListToFile(LinkedList* list, FILE* f)
-{
-    Node* currentNode;
-    currentNode = list -> head;
-
-    while(currentNode != NULL)
-    {
-        (*list -> outputFunc)(currentNode -> data, f);
-        currentNode = currentNode -> next;
-    }
-}
 
 void freeLinkedList(LinkedList* list)
 {
@@ -162,7 +151,9 @@ void freeLinkedList(LinkedList* list)
     {
         nextNode = currentNode -> next;
         /*free(currentNode); */
-        (*list -> freeFunc)(currentNode);
+    
+        (*list -> freeFunc)(currentNode -> data);
+        free(currentNode);
         currentNode = nextNode;
     }
     free(list);
@@ -181,7 +172,7 @@ void logsPrinter(void* ptr)
 }
 
 
-void logsOutputToFile(void* ptr, FILE* f)
+void logsFileFunc(void* ptr, FILE* f)
 {   
     MoveLog* move;
     move = (MoveLog*)ptr;
@@ -197,8 +188,6 @@ void logsFree(void* ptr)
 {
     MoveLog* move;
     move = (MoveLog*)ptr;
-    /* This isn't necessary because there isn't any malloced data inside
-        the logs struct. 
-        But just to show that it would work as a generic linked list */
+    
     free(move);
 } 

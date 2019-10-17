@@ -1,5 +1,7 @@
 #include "filemanager.h"
+#include "linkedlist.h"
 #include <stdlib.h>
+#include <time.h>
 
 /* Imports the address of the setting variables, so they can be set without returning
     will return 0, if no errors are occured */
@@ -103,4 +105,51 @@ int settingsImport(char* fileName, Settings* settings)
         error = TRUE;
     }
     return error;
+}
+
+void saveLogsToFile(Settings* settings, LinkedList* logs)
+{
+    int hours, minutes, day, month;
+    FILE* f;
+    char fileName[50]; /* consider changing */
+    /* NEED TO CHECK IF THIS IS THE PROPER WAY */
+    time_t now;
+    struct tm* local;
+    time(&now);
+    local = localtime(&now);
+
+    hours = local -> tm_hour;
+    minutes = local -> tm_min;
+    day = local -> tm_mday;
+    month = local -> tm_mon + 1;
+
+    printf("Today is: %s\n", ctime(&now));
+
+    /* NOT ENTIRELY SURE WHY BUT HOURS AND MINUTES ARE WRONG WAY ROUND */
+    sprintf(fileName, "MNK_%d-%d-%d_%02d-%02d_%02d-%02d.log", settings -> width, 
+            settings -> height, settings -> matching, hours, minutes, day, month);
+    f = fopen(fileName, "w");
+    
+    if(f != NULL)
+    {
+        outputListToFile(logs, f);
+        fclose(f);
+    }
+    else
+    {
+        printf("FILE ERROR");
+        /*perror();*/
+    }
+}
+
+void outputListToFile(LinkedList* list, FILE* f)
+{
+    Node* currentNode;
+    currentNode = list -> head;
+
+    while(currentNode != NULL)
+    {
+        (*list -> outputFunc)(currentNode -> data, f);
+        currentNode = currentNode -> next;
+    }
 }

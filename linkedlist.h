@@ -39,9 +39,7 @@ void* removeLast(LinkedList* list);
 void printLinkedList(LinkedList* list);
 void freeLinkedList(LinkedList* list);
 
-void outputListToFile(LinkedList* list, FILE* f);
 void logsPrinter(void* ptr);
 void logsFree(void* ptr);
-void logsOutputToFile(void* ptr, FILE* f);
-
+void logsFileFunc(void* ptr, FILE* f);
 #endif

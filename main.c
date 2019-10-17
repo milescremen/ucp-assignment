@@ -4,6 +4,7 @@
 int main(int argc, char* argv[])
 {
     Settings* settings;
+    LinkedList* logs;
     int error;
     error = FALSE;
 
@@ -11,12 +12,16 @@ int main(int argc, char* argv[])
         print out an error and exit */
     if(argc == 2)
     {
+
         settings = (Settings*)malloc(sizeof(Settings));
         error = settingsImport(argv[1], settings);
         if(error == FALSE)
         {
-            userInterface(settings);
+            logs = createLinkedList(logsPrinter, logsFree, logsFileFunc);
+            userInterface(settings, logs);
         }
+
+        freeLinkedList(logs);
         free(settings);
     }
     else

@@ -184,6 +184,8 @@ int playerMove(Tile** board, Settings* settings, char* player, char playerTile, 
     int winner;
     winner = FALSE;
     inputted = FALSE;
+
+    printf("PLayer tile T: %c\n", playerTile);
     while(inputted == FALSE)
     {
         displayBoard(board, settings);
@@ -250,13 +252,13 @@ int checkHorizontal(Tile** board, Settings* settings, int row, int col, char pla
     int count; /* Keeps count of the amount of adjacent playerTiles */
     int leftColIndex;
     int rightColIndex;
-    int done;
-    char winner;
+    int isEqual;
+    int winner;
 
     count = 1; 
     leftColIndex = 0;
     rightColIndex = 0;
-    done = FALSE; 
+    isEqual = TRUE; 
     winner = FALSE;
 
     /* Iterates to the left */
@@ -264,33 +266,47 @@ int checkHorizontal(Tile** board, Settings* settings, int row, int col, char pla
     rightColIndex = col + 1; /* Starts the column index to the right of the inputted tile */
     /* Then while their is matching tiles, it will iterate to the left and right
         incrementing the count */
-    while(done == FALSE && leftColIndex > -1 && rightColIndex < settings -> width) /* Checks if the tile is matching to the players tile */
+
+    while(leftColIndex > -1 && isEqual == TRUE)
     {
         if(board[leftColIndex][row].value == playerTile) /* Iterates left */
         {
             leftColIndex--; /* Moves index to the left */
             count++;
         }
-        else if(board[rightColIndex][row].value == playerTile) /* Iterates right */
+        else
+        {
+            isEqual = FALSE;
+        }
+    }
+
+    if(count >= settings -> matching) 
+    {
+        winner = TRUE;
+    }
+    else
+    {
+        isEqual = TRUE;
+    }
+    /* Additional boolean check winner == FALSE included because 
+        if we find a winner in previous loop, we don't need to check the otherwise */
+    while(rightColIndex < settings -> width && isEqual == TRUE) 
+    {
+        if(board[rightColIndex][row].value == playerTile) /* Iterates right */
         {
             rightColIndex++;
             count++;
         }
         else
         {
-            done = TRUE;
-        }
-
-        if(count >= settings -> matching) /* Ends loop early if winner is found*/
-        {
-            done = TRUE;
-            winner = TRUE;
+            isEqual = FALSE;
         }
     }
-
-
-
-    /* printf("Horizontal COUNT: %d\n", count); */
+ 
+    if(count >= settings -> matching) 
+    {
+        winner = TRUE;
+    }
     return winner;
 }
 
@@ -298,45 +314,59 @@ int checkHorizontal(Tile** board, Settings* settings, int row, int col, char pla
 int checkVertical(Tile** board, Settings* settings, int row, int col, char playerTile)
 {
     int count; /* Keeps count of the amount of adjacent playerTiles */
-    int done;
     int upRowIndex;
     int downRowIndex;
+    int isEqual;
     int winner;
 
     count = 1; 
-    done = FALSE; 
+    isEqual = TRUE; 
     winner = FALSE; 
 
     /* Iterates upwards */
     upRowIndex = row - 1; /* Starts the row index to above the inputted tile */
     downRowIndex = row + 1; /* Starts the row index to below of the inputted tile */
 
-    /* Then while their is matching tiles, it will iterate to the left
-        incrementing the count */
-    while(done == FALSE && upRowIndex > -1 && downRowIndex < settings -> height) /* Checks if the tile is matching to the players tile */
+    while(upRowIndex > -1 && isEqual == TRUE)
     {
-        if(count >= settings -> matching)
-        {
-            done = TRUE;
-            winner = TRUE;
-        }
-        else if(board[col][upRowIndex].value == playerTile)
+        if(board[col][upRowIndex].value == playerTile)
         {
             upRowIndex--; /* Moves index to the left */
             count++;
         }
-        else if(board[col][downRowIndex].value == playerTile)
+        else
+        {
+            isEqual = FALSE;
+        }
+    }
+
+    if(count >= settings -> matching) 
+    {
+        winner = TRUE;
+    }
+    else
+    {
+        isEqual = TRUE;
+    }
+    while(downRowIndex < settings -> height && isEqual == TRUE)
+    {
+        if(board[col][downRowIndex].value == playerTile)
         {
             downRowIndex++;
             count++;
         }
         else
         {
-            done = TRUE;
-        }
+            isEqual = FALSE;
+        }   
     }
 
-    /* printf("Vertical COUNT: %d\n", count); */
+    if(count >= settings -> matching) 
+    {
+        winner = TRUE;
+    }
+    /* Then while their is matching tiles, it will iterate to the left
+        incrementing the count */
     return winner;
 }
 
@@ -344,17 +374,16 @@ int checkDiagonal(Tile** board, Settings* settings, int row, int col, char playe
 {
     /* Keeps count of the amount of adjacent playerTiles */
     int count;
-    char winner;
+    int winner;
     /* Iterates up and to the left */
     int upColIndex;
     int upRowIndex;
     /* Iterates down and to the right */
     int downColIndex; 
     int downRowIndex;
-    int done;
-
+    int isEqual;
     count = 1; 
-    done = FALSE; 
+    isEqual = TRUE; 
     winner = FALSE;
     /* Starts the column index to the left of the inputted tile */
     upRowIndex = row - 1;
@@ -363,22 +392,34 @@ int checkDiagonal(Tile** board, Settings* settings, int row, int col, char playe
     downRowIndex = row + 1;  
     downColIndex = col + 1;
 
-    /* Then while their is matching tiles, it will iterate up
-        incrementing the count */
-    while(done == FALSE && upRowIndex > -1 && upColIndex > -1 && downRowIndex < settings -> height && downColIndex < settings -> width) /* Checks if the tile is matching to the players tile */
+    while(upRowIndex > -1 && upColIndex > -1 && isEqual == TRUE)
     {
-        if(count >= settings -> matching)
-        {
-            done = TRUE;
-            winner = TRUE;
-        }
-        else if(board[upColIndex][upRowIndex].value == playerTile)
+        if(board[upColIndex][upRowIndex].value == playerTile)
         {
             upRowIndex--; /* Moves Up 1 diagonally */
             upColIndex--;
             count++;
         }
-        else if(board[downColIndex][downRowIndex].value == playerTile)
+        else
+        {
+            isEqual = FALSE;
+        }
+    }
+
+    if(count >= settings -> matching) 
+    {
+        winner = TRUE;
+    }
+    else
+    {
+        isEqual = TRUE;
+    }
+
+    isEqual = TRUE;
+    while(downRowIndex < settings -> height && downColIndex < settings -> width 
+            && isEqual == TRUE)
+    {
+        if(board[downColIndex][downRowIndex].value == playerTile)
         {
             downRowIndex++;
             downColIndex++;
@@ -386,11 +427,15 @@ int checkDiagonal(Tile** board, Settings* settings, int row, int col, char playe
         }
         else
         {
-            done = TRUE;
+            isEqual = FALSE;
         }
     }
 
-    /* printf("Diagonal COUNT: %d\n", count); */
+    if(count >= settings -> matching)
+    {
+        winner = TRUE;
+    }
+    printf("D COUNT: %d\n", count); 
     return winner;
 }
 
@@ -398,7 +443,7 @@ int checkDiagonal(Tile** board, Settings* settings, int row, int col, char playe
 int checkAntiDiagonal(Tile** board, Settings* settings, int row, int col, char playerTile)
 {
     int count; /* Keeps count of the amount of adjacent playerTiles */
-    int done;
+    int isEqual;
     int winner;
     /* Iterates up and to the right */
     int upColIndex;
@@ -407,7 +452,7 @@ int checkAntiDiagonal(Tile** board, Settings* settings, int row, int col, char p
     int downColIndex;
     int downRowIndex;
     count = 1; 
-    done = FALSE; 
+    isEqual = TRUE;
     winner = FALSE;
 
     upRowIndex = row - 1; /* Starts the column index to the left of the inputted tile */
@@ -416,20 +461,34 @@ int checkAntiDiagonal(Tile** board, Settings* settings, int row, int col, char p
     downColIndex = col - 1;
     /* Then while their is matching tiles, it will iterate up
         incrementing the count */
-    while(done == FALSE && upRowIndex > -1 && upColIndex < settings -> width && downRowIndex < settings ->height && downColIndex > -1) /* Checks if the tile is matching to the players tile */
+
+    while(upRowIndex > -1 && upColIndex < settings -> width && isEqual == TRUE)
     {
-        if(count >= settings -> matching)
-        {
-            done = TRUE;
-            winner = TRUE;
-        } 
-        else if(board[upColIndex][upRowIndex].value == playerTile)
+        if(board[upColIndex][upRowIndex].value == playerTile)
         {
             upRowIndex--; /* Moves Up 1 diagonally */
             upColIndex++;
             count++;
         }
-        else if(board[downColIndex][downRowIndex].value == playerTile)
+        else
+        {
+            isEqual = FALSE;
+        }
+    }
+
+    if(count >= settings -> matching) 
+    {
+        winner = TRUE;
+    }
+    else
+    {
+        isEqual = TRUE;
+    }
+
+    while(downRowIndex < settings ->height && downColIndex > -1 &&
+            isEqual == TRUE)
+    {
+        if(board[downColIndex][downRowIndex].value == playerTile)
         {
             downRowIndex++;
             downColIndex--;
@@ -437,11 +496,16 @@ int checkAntiDiagonal(Tile** board, Settings* settings, int row, int col, char p
         }
         else
         {
-            done = TRUE;
+            isEqual = FALSE;
         }
     }
-    
-    /* printf("Anti Diagonal COUNT: %d\n", count); */
+
+    if(count >= settings -> matching)
+    {
+        winner = TRUE;
+    } 
+
+        printf("AD COUNT: %d\n", count); 
     return winner;
 }
 

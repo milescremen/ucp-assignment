@@ -1,0 +1,48 @@
+int checkHorizontal(Tile** board, Settings* settings, int row, int col, char playerTile)
+{
+    int count; /* Keeps count of the amount of adjacent playerTiles */
+    int leftColIndex;
+    int rightColIndex;
+    int done;
+    int winner;
+
+    count = 1; 
+    leftColIndex = 0;
+    rightColIndex = 0;
+    done = FALSE; 
+    winner = FALSE;
+
+    /* Iterates to the left */
+    leftColIndex = col - 1; /* Starts the column index to the left of the inputted tile */
+    rightColIndex = col + 1; /* Starts the column index to the right of the inputted tile */
+    /* Then while their is matching tiles, it will iterate to the left and right
+        incrementing the count */
+    while(done == FALSE && leftColIndex > -1 && rightColIndex < settings -> width) /* Checks if the tile is matching to the players tile */
+    {
+        if(board[leftColIndex][row].value == playerTile) /* Iterates left */
+        {
+            printf("1111111111111111\n");
+            leftColIndex--; /* Moves index to the left */
+            count++;
+        }
+        else if(board[rightColIndex][row].value == playerTile) /* Iterates right */
+        {
+            printf("222222222222222222\n");
+            rightColIndex++;
+            count++;
+        }
+        else
+        {
+            printf("33333333333333\n");
+            done = TRUE;
+        }
+        /* Ends loop early if winner is found */
+        if(count >= settings -> matching) 
+        {
+            done = TRUE;
+            winner = TRUE;
+        }
+    }
+    printf("H Count: %d\n", count);
+    return winner;
+}

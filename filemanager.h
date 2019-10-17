@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include "linkedlist.h"
 
 /* Defines */
 #define FALSE 0
@@ -21,5 +21,6 @@ typedef struct {
 /* Forward Declarations */
 
 int settingsImport(char* fileName, Settings* settings);
-
+void outputListToFile(LinkedList* list, FILE* f);
+void saveLogsToFile();
 #endif

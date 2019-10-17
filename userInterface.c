@@ -1,11 +1,10 @@
 #include "userinterface.h"
 #include <time.h>
-void userInterface(Settings* settings)
+#include "filemanager.h"
+void userInterface(Settings* settings, LinkedList* logs)
 {
     int userInput;
     char line[255];
-    LinkedList* logs;
-    logs = createLinkedList(logsPrinter, logsFree, logsOutputToFile);
     printf("Welcome to Tic Tac Toe\n");
     do
     {
@@ -49,7 +48,6 @@ void userInterface(Settings* settings)
                 break;
             case 5:
                 printf("Goodbye\n");
-                freeLinkedList(logs);
                 break;
         }
     } while(userInput != 5);
@@ -67,44 +65,3 @@ void viewCurrentLogs(Settings* settings, LinkedList* logs)
     printLinkedList(logs);
 }
 
-void saveLogsToFile(Settings* settings, LinkedList* logs)
-{
-    int hours, minutes, day, month;
-    FILE* f;
-    char fileName[50]; /* consider changing */
-    /* NEED TO CHECK IF THIS IS THE PROPER WAY */
-    time_t now;
-    struct tm* local;
-    time(&now);
-    local = localtime(&now);
-
-    hours = local -> tm_hour;
-    minutes = local -> tm_min;
-    day = local -> tm_mday;
-    month = local -> tm_mon + 1;
-
-    printf("Today is: %s\n", ctime(&now));
-
-    /* NOT ENTIRELY SURE WHY BUT HOURS AND MINUTES ARE WRONG WAY ROUND */
-    sprintf(fileName, "MNK_%d-%d-%d_%02d-%02d_%02d-%02d.log", settings -> width, 
-            settings -> height, settings -> matching, hours, minutes, day, month);
-    f = fopen(fileName, "w");
-    
-    if(f != NULL)
-    {
-        outputListToFile(logs, f);
-        fclose(f);
-    }
-    else
-    {
-        printf("FILE ERROR");
-        /*perror();*/
-    }
-}
-/*
-void exitCleanup()
-{
-    freeLinkedList(logs);
-
-}
-*/
