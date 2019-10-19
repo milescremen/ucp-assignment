@@ -439,7 +439,6 @@ int checkDiagonal(Tile** board, Settings* settings, int row, int col, char playe
     return winner;
 }
 
-
 int checkAntiDiagonal(Tile** board, Settings* settings, int row, int col, char playerTile)
 {
     int count; /* Keeps count of the amount of adjacent playerTiles */

@@ -4,6 +4,16 @@ CFLAGS = -Wall -ansi -pedantic -Werror -std=c89 -g
 OBJ = main.o userinterface.o game.o linkedlist.o filemanager.o
 EXEC = tictactoe
 
+ifdef SECRET
+CFLAGS += -D SECRET
+SECRET : clean $(EXEC)
+endif
+
+ifdef EDITOR
+CFLAGS += -D EDITOR
+EDITOR : clean $(EXEC)
+endif
+
 #Executable creation 
 $(EXEC) : $(OBJ)
 	$(CC) $(OBJ) -o $(EXEC) -g

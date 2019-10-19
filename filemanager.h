@@ -21,6 +21,5 @@ typedef struct {
 /* Forward Declarations */
 
 int settingsImport(char* fileName, Settings* settings);
-void outputListToFile(LinkedList* list, FILE* f);
-void saveLogsToFile();
+void saveLogsToFile(Settings* settings, LinkedList* logs);
 #endif

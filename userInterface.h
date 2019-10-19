@@ -19,5 +19,6 @@
 void userInterface(Settings* settings, LinkedList* logs);
 void viewSettings(Settings* settings);
 void viewCurrentLogs();
+void changeSettings(Settings* settings);
 
 #endif

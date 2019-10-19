@@ -115,6 +115,7 @@ void saveLogsToFile(Settings* settings, LinkedList* logs)
     /* NEED TO CHECK IF THIS IS THE PROPER WAY */
     time_t now;
     struct tm* local;
+    Node* currentNode;
     time(&now);
     local = localtime(&now);
 
@@ -132,24 +133,19 @@ void saveLogsToFile(Settings* settings, LinkedList* logs)
     
     if(f != NULL)
     {
-        outputListToFile(logs, f);
+
+        currentNode = list -> head;
+
+        while(currentNode != NULL)
+        {
+            (*list -> outputFunc)(currentNode -> data, f);
+            currentNode = currentNode -> next;
+        }
         fclose(f);
     }
     else
     {
         printf("FILE ERROR");
         /*perror();*/
-    }
-}
-
-void outputListToFile(LinkedList* list, FILE* f)
-{
-    Node* currentNode;
-    currentNode = list -> head;
-
-    while(currentNode != NULL)
-    {
-        (*list -> outputFunc)(currentNode -> data, f);
-        currentNode = currentNode -> next;
     }
 }
