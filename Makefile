@@ -1,6 +1,7 @@
 #Makefile Variables
 CC = gcc
 CFLAGS = -Wall -ansi -pedantic -Werror -std=c89 -g
+#CFLAGS = -Wall -Wextra -Wfloat-equal -Wundef -Werror -fverbose-asm -Wint-to-pointer-cast -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wcast-qual -Wmissing-prototypes -Wstrict-overflow=5 -Wwrite-strings -Wconversion --pedantic-errors -std=gnu11 -ggdb
 OBJ = main.o userinterface.o game.o linkedlist.o filemanager.o
 EXEC = tictactoe
 

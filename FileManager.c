@@ -33,7 +33,7 @@ int settingsImport(char* fileName, Settings* settings)
             {
                 if(setting == 'M' || setting == 'm')
                 {
-                    if((value >= 1) && (widthBool == FALSE)) /* Minimum of 1 column */
+                    if((value > 0) && (widthBool == FALSE)) /* Minimum of 1 column */
                     {
                         settings -> width = value;
                         widthBool = TRUE;
@@ -51,7 +51,7 @@ int settingsImport(char* fileName, Settings* settings)
                 }
                 else if(setting == 'N' || setting == 'n')
                 {
-                    if((value >= 1) && (heightBool == FALSE))/* Minimum of 1 row */
+                    if((value > 0) && (heightBool == FALSE))/* Minimum of 1 row */
                     {
                         settings -> height = value;
                         heightBool = TRUE; /* sets bool to true, so duplicates dont occur */
@@ -69,7 +69,7 @@ int settingsImport(char* fileName, Settings* settings)
                 }
                 else if(setting == 'K' || setting == 'k')
                 {
-                    if((value >= 2) && (matchingBool == FALSE)) /* Minimum of two matching tiles */
+                    if((value > 1) && (matchingBool == FALSE)) 
                     {
                         settings -> matching = value;
                         matchingBool = TRUE;
@@ -134,11 +134,11 @@ void saveLogsToFile(Settings* settings, LinkedList* logs)
     if(f != NULL)
     {
 
-        currentNode = list -> head;
+        currentNode = logs -> head;
 
         while(currentNode != NULL)
         {
-            (*list -> outputFunc)(currentNode -> data, f);
+            (*logs -> outputFunc)(currentNode -> data, f);
             currentNode = currentNode -> next;
         }
         fclose(f);

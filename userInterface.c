@@ -4,17 +4,21 @@
 void userInterface(Settings* settings, LinkedList* logs)
 {
     int userInput, min, max;
-    char line[255];
+    int error;
+    char* input;
+    char* ptr; 
     min = 1;
     #ifdef EDITOR
     max = 6;
     #else
     max = 5;
     #endif
-    
+
+    input = (char*)malloc(sizeof(char) * 255); 
     printf("Welcome to Tic Tac Toe\n");
     do
     {
+        error = FALSE;
         do
         {
             printf("\nPlease select from the following options\n");
@@ -33,21 +37,27 @@ void userInterface(Settings* settings, LinkedList* logs)
             printf("5: Exit the application\n");
             #endif
             
-/*            nRead = scanf("%d", &userInput);
-            if(nRead != 1)
+            if(fgets(input, 255, stdin) != NULL)
             {
-                printf("Error, please enter an integer");
+                if(input[255 - 1] != '\n')
+                {
+                    userInput = strtol(input, &ptr, 10);
+                }
+                else
+                {
+                    input = NULL;
+                }
+                /* Checks that strtol hasn't returned 0 (will return 0 if not a numbe 
+                    and checks if the trailing ptr is just the value of \0 and \n
+                        if so this means that theres nothing behind the input,
+                        For example: 1a will be picked up as an invalid input */
+                if(userInput != 0 && *ptr != ('\0' + '\n'))
+                {
+                    error = TRUE;
+                    printf("ERROR: Please enter an integer between %d and %d\n", min, max);
+                }
             }
-*/           
-            if(fgets(line, 255, stdin) != NULL)
-            {
-                userInput = atoi(line);
-            }
-            else
-            {
-                printf("Error, please enter an integer");
-            }
-        } while((userInput < min || userInput > max));
+        } while((userInput < min || userInput > max || error == TRUE));
 
         switch(userInput)
         {
