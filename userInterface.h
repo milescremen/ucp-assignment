@@ -12,6 +12,7 @@
 /* Defines */
 #define FALSE 0
 #define TRUE !FALSE
+#define BUFFER_SIZE 255
 
 /* Typedefs */
 
@@ -20,6 +21,6 @@ void userInterface(Settings* settings, LinkedList* logs);
 void viewSettings(Settings* settings);
 void viewCurrentLogs();
 void changeSettings(Settings* settings);
-void parseIntegerInput(int* userInput, int* min, int* max);
+void parseIntegerInput(int* userInput, int min, int max);
 
 #endif

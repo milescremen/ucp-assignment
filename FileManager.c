@@ -10,6 +10,7 @@ int settingsImport(char* fileName, Settings* settings)
     FILE* f;
     char setting; 
     int value, nRead;
+    int widthValue, heightValue, matchValue;
     int widthBool, heightBool, matchingBool; /* Used for checking for duplicates */
     int error; /* Returns 0 if file is read correctly */
 
@@ -19,6 +20,9 @@ int settingsImport(char* fileName, Settings* settings)
 
     error = FALSE;
     f = fopen(fileName, "r"); /* r flag for reading the file */
+    widthValue = 0;
+    heightValue = 0;
+    matchValue = 0;
 
     /* Checks if file opened, otherwise will print an error and exit */
     if(f != NULL)
@@ -35,7 +39,7 @@ int settingsImport(char* fileName, Settings* settings)
                 {
                     if((value > 0) && (widthBool == FALSE)) /* Minimum of 1 column */
                     {
-                        settings -> width = value;
+                        widthValue = value;
                         widthBool = TRUE;
                     }
                     else if(widthBool == TRUE)
@@ -53,7 +57,7 @@ int settingsImport(char* fileName, Settings* settings)
                 {
                     if((value > 0) && (heightBool == FALSE))/* Minimum of 1 row */
                     {
-                        settings -> height = value;
+                        heightValue = value;
                         heightBool = TRUE; /* sets bool to true, so duplicates dont occur */
                     }
                     else if(heightBool == TRUE)
@@ -69,9 +73,9 @@ int settingsImport(char* fileName, Settings* settings)
                 }
                 else if(setting == 'K' || setting == 'k')
                 {
-                    if((value > 1) && (matchingBool == FALSE)) 
+                    if((value >= 1) && (matchingBool == FALSE)) 
                     {
-                        settings -> matching = value;
+                        matchValue = value;
                         matchingBool = TRUE;
                     }
                     else if(matchingBool == TRUE)
@@ -95,6 +99,23 @@ int settingsImport(char* fileName, Settings* settings)
             {
                 printf("ERROR: Invalid line\n");
                 error = TRUE;
+            }
+
+            /* Another check that K is smaller than the board, this is done
+                here because need to input M and N first */
+            if(widthBool == TRUE && heightBool == TRUE)
+            {
+                if((matchValue <= widthValue) && (matchValue <= heightValue))
+                {
+                    settings -> width = widthValue;
+                    settings -> height = heightValue;
+                    settings -> matching = matchValue;
+                }
+                else 
+                {
+                    printf("ERROR: Invalid matching setting(K must be smaller than M and N\n");
+                    error = TRUE;
+                }
             }
         } while(!feof(f) && error == FALSE);
         fclose(f);

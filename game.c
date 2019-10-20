@@ -1,7 +1,6 @@
 #include "game.h"
+#include "userinterface.h"
 
-
-/* FOR SOME REASON IF I ENTER 0,02 it stills works as 0,2 */
 
 /* Calls the other methods to run a game */
 void game(Settings* settings, LinkedList* logs)
@@ -51,7 +50,8 @@ void game(Settings* settings, LinkedList* logs)
     if(winner == TRUE)
     {
         /* Player one always goes first, so we mod to find the winner */
-        if(moveCount % maxMoves != 0)
+        /* moveCount == 1 is for the special case of k = 1 */
+        if(moveCount % maxMoves != 0 || moveCount == 1)
         {
             displayBoard(board, settings);
             printf("\nPlayer One is the winner!!!\n");
@@ -131,11 +131,12 @@ void displayBoard(Tile** board, Settings* settings)
     int i, j, k;
 
     /* Prints numbers above board */
+    printf("    ");
     for(i = 0; i < settings -> width; i++)
     {
-        printf("   %d", i);
+        printf("%02d  ", i);
     }
-    printf("\n ");
+    printf("\n   ");
     /* Prints first border of board */
     for(i = 0; i < settings -> width; i++)
     {
@@ -144,7 +145,7 @@ void displayBoard(Tile** board, Settings* settings)
     /* Prints out the rows of the board */
     for(i = 0; i < settings -> height; i++)
     {
-        printf("\n%d|", i);
+        printf("\n%02d|", i);
         for(j = 0; j < settings -> width; j++)
         {
             /*printf(" %d,%d ", board[i][j].row, board[i][j].col);*/
@@ -156,7 +157,7 @@ void displayBoard(Tile** board, Settings* settings)
             W W W
             1 2 3*/
         }
-        printf("\n ");
+        printf("\n   ");
         /* Prints out the line seperators 
             but checks that it isn't the last line */
         if(i != (settings -> height - 1))
@@ -179,52 +180,50 @@ int playerMove(Tile** board, Settings* settings, char* player, char playerTile, 
     MoveLog* move; /* Struct created to store the logs for moves */ 
     int row;
     int col;
-    int nRead;
     int inputted;
     int winner;
     winner = FALSE;
     inputted = FALSE;
+    col = -1;
+    row = -1;
 
     printf("PLayer tile T: %c\n", playerTile);
     while(inputted == FALSE)
     {
         displayBoard(board, settings);
         printf("\n%s, Please enter coords to place a %c\n", player, playerTile);
-        nRead = scanf("%d,%d", &col, &row);
-        if(nRead == 2)
+        do
         {
-            /* Validates if the input value is within the board */
-            if((row < settings -> height && row >= 0) && (col < settings -> width && col >= 0))
-            {
-                /* Checks if the tile is occupied */
-                if(board[col][row].value == EMPTY_TILE)
-                {
-                    board[col][row].value = playerTile;
-                    inputted = TRUE; /* Ends the loop asking for input */
+            printf("%s, Please enter the Y-coordinate to place a %c\n", player, playerTile);
+            parseIntegerInput(&row, -1, (settings -> height - 1));
+        } while(row >= settings -> height || row < 0);
 
-                    /* Stores the information for the current move in the new MoveLog struct */
-                    move = (MoveLog*)malloc(sizeof(MoveLog));
-                    move -> game = gameCount;
-                    move -> player = playerTile;
-                    move -> xLocation = col;
-                    move -> yLocation = row;
-                    move -> turn = moveCount;
-                    insertLast(move, logs);
-                    winner = checkWin(board, settings, row, col, playerTile);
-                }
-                else
-                {
-                    printf("ERROR: Tile is already occupied, please try again\n");
-                }
-            }
-            else
-            {
-                printf("ERROR: Coords not in range of board, please try again\n");
-            }  
+        do
+        {
+            printf("%s, Please enter the Y-coordinate to place a %c\n", player, playerTile);
+            parseIntegerInput(&col, -1, (settings -> width));
+        } while(col >= settings -> width || col < 0);
+
+        printf("ERROR: Coords not in range of board, please try again\n");
+        
+        if(board[col][row].value == EMPTY_TILE)
+        {
+            board[col][row].value = playerTile;
+            inputted = TRUE; /* Ends the loop asking for input */
+
+            /* Stores the information for the current move in the new MoveLog struct */
+            move = (MoveLog*)malloc(sizeof(MoveLog));
+            move -> game = gameCount;
+            move -> player = playerTile;
+            move -> xLocation = col;
+            move -> yLocation = row;
+            move -> turn = moveCount;
+            insertLast(move, logs);
+            winner = checkWin(board, settings, row, col, playerTile);
         }
         else
         {
-            printf("ERROR: Invalid coords inputted, please try again\n");
+            printf("ERROR: Tile is already occupied, please try again\n");
         }
     }
     return winner;

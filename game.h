@@ -9,6 +9,7 @@
 #include "linkedlist.h"
 #include <time.h>
 #include "filemanager.h"
+#include "userinterface.h"
 
 /* Defines */
 #define FALSE 0
